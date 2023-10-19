@@ -3,7 +3,10 @@
 add_executable(utest
 particle_info_test.cpp
 math_vector_test.cpp
-block_test.cpp)
+block_test.cpp
+grid_test.cpp
+progargs_test.cpp
+)
 # Library dependencies
 target_link_libraries (utest
 PRIVATE

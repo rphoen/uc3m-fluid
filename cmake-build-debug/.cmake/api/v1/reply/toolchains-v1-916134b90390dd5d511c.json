@@ -5,41 +5,10 @@
 		{
 			"compiler" : 
 			{
-				"id" : "GNU",
-				"implicit" : 
-				{
-					"includeDirectories" : 
-					[
-						"/usr/lib/gcc/x86_64-redhat-linux/13/include",
-						"/usr/local/include",
-						"/usr/include"
-					],
-					"linkDirectories" : 
-					[
-						"/usr/lib/gcc/x86_64-redhat-linux/13",
-						"/usr/lib64",
-						"/lib64",
-						"/usr/lib"
-					],
-					"linkFrameworkDirectories" : [],
-					"linkLibraries" : 
-					[
-						"gcc",
-						"gcc_s",
-						"c",
-						"gcc",
-						"gcc_s"
-					]
-				},
-				"path" : "/usr/bin/cc",
-				"version" : "13.2.1"
+				"implicit" : {},
+				"path" : "/usr/bin/cc"
 			},
-			"language" : "C",
-			"sourceFileExtensions" : 
-			[
-				"c",
-				"m"
-			]
+			"language" : "C"
 		},
 		{
 			"compiler" : 
@@ -87,6 +56,7 @@
 				"cc",
 				"cpp",
 				"cxx",
+				"m",
 				"mm",
 				"mpp",
 				"CPP",
