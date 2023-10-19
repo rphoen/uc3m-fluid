@@ -101,7 +101,7 @@ rule CXX_STATIC_LIBRARY_LINKER__gtest_main_Debug
 rule CXX_COMPILER__sim_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
-  command = /var/lib/snapd/snap/clion/250/bin/cmake/linux/x64/bin/cmake -E __run_co_compile --tidy="clang−tidy;−header−filter=.∗;--extra-arg-before=--driver-mode=g++" --source=$in -- /usr/bin/c++ $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  command = /usr/bin/c++ $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
   description = Building CXX object $out
 
 
@@ -120,7 +120,7 @@ rule CXX_STATIC_LIBRARY_LINKER__sim_Debug
 rule CXX_COMPILER__fluid_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
-  command = /var/lib/snapd/snap/clion/250/bin/cmake/linux/x64/bin/cmake -E __run_co_compile --tidy="clang−tidy;−header−filter=.∗;--extra-arg-before=--driver-mode=g++" --source=$in -- /usr/bin/c++ $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  command = /usr/bin/c++ $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
   description = Building CXX object $out
 
 
@@ -139,7 +139,7 @@ rule CXX_EXECUTABLE_LINKER__fluid_Debug
 rule CXX_COMPILER__utest_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
-  command = /var/lib/snapd/snap/clion/250/bin/cmake/linux/x64/bin/cmake -E __run_co_compile --tidy="clang−tidy;−header−filter=.∗;--extra-arg-before=--driver-mode=g++" --source=$in -- /usr/bin/c++ $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  command = /usr/bin/c++ $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
   description = Building CXX object $out
 
 
