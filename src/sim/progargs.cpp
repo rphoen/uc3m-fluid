@@ -1,6 +1,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "progargs.hpp"
+
 int progargs(int argc, char **argv) {
   int nts;
 

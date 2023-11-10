@@ -1,0 +1,5 @@
+if(EXISTS "/Users/rphoen/uc3m/Computer Architecture/uc3m-fluid/build/src/utest/utest[1]_tests.cmake")
+  include("/Users/rphoen/uc3m/Computer Architecture/uc3m-fluid/build/src/utest/utest[1]_tests.cmake")
+else()
+  add_test(utest_NOT_BUILT utest_NOT_BUILT)
+endif()
