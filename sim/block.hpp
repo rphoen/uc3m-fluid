@@ -1,27 +1,36 @@
-#include "block.hpp"
-#include <cmath>
+#ifndef BLOCK_CPP
+#define BLOCK_CPP
+
+#include <vector>
 
 namespace Constants {
   // Information from initial file
-  float ppm = 0.0;
-  int np = 0.0;
+  extern float ppm;
+  extern int np;
 
   // Simulation scalar constants
-  double radiusMultiplier = 1.695;
-  double fluidDensity = pow(10, 3);
-  double stiffnessPressure = 3.0;
-  double stiffnessCollisions = 3 * pow(10, 4);
-  double damping = 128.0;
-  double viscosity = 0.4;
-  double particleSize = 2 * pow(10, -4);
-  double timeStep = pow(10, -3);
+  extern double radiusMultiplier;
+  extern double fluidDensity;
+  extern double stiffnessPressure;
+  extern double stiffnessCollisions;
+  extern double damping;
+  extern double viscosity;
+  extern double particleSize;
+  extern double timeStep;
 
   // Simulation vector constants
-  std::vector<double> externalAcceleration = {0.0, -9.8, 0.0};
-  std::vector<double> boxUpperBound = {0.065, 0.1, 0.065};
-  std::vector<double> boxLowerBound = {-0.065, -0.08, -0.065};
+  extern std::vector<double> externalAcceleration;
+  extern std::vector<double> boxUpperBound;
+  extern std::vector<double> boxLowerBound;
 
   // Simulation parameters
-  double particleMass = fluidDensity / pow(ppm, 3);
-  double smoothingLength = radiusMultiplier / ppm;
+  extern double particleMass;
+  extern double smoothingLength;
 };
+
+class Particle {
+  public:
+    float px, py, pz, hvx, hvy, hvz, vx, vy, vz;
+};
+
+#endif
