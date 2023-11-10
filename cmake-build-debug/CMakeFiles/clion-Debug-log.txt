@@ -1,22 +1,4 @@
 /var/lib/snapd/snap/clion/250/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/var/lib/snapd/snap/clion/250/bin/ninja/linux/x64/ninja -G Ninja -S "/home/zhao/ntu/Computer Architecture/fluid" -B "/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug"
--- Found Python3: /usr/bin/python3.11 (found version "3.11.5") found components: Interpreter 
--- Performing Test CMAKE_HAVE_LIBC_PTHREAD
--- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
--- Found Threads: TRUE  
-CMake Error at CMakeLists.txt:33 (add_subdirectory):
-  add_subdirectory given source "sim" which is not an existing directory.
-
-
-CMake Error at CMakeLists.txt:34 (add_subdirectory):
-  add_subdirectory given source "fluid" which is not an existing directory.
-
-
-CMake Error at CMakeLists.txt:37 (add_subdirectory):
-  add_subdirectory given source "utest" which is not an existing directory.
-
-
-CMake Error at CMakeLists.txt:38 (add_subdirectory):
-  add_subdirectory given source "ftest" which is not an existing directory.
-
-
--- Configuring incomplete, errors occurred!
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug

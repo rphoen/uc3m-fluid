@@ -46,8 +46,9 @@ build googletest-populate: phony CMakeFiles/googletest-populate CMakeFiles/googl
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd "/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/_deps/googletest-subbuild" && /var/lib/snapd/snap/clion/250/bin/cmake/linux/x64/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
-  DESC = No interactive CMake dialog available...
+  COMMAND = cd "/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/_deps/googletest-subbuild" && /usr/bin/ccmake -S"/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/_deps/googletest-subbuild" -B"/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/_deps/googletest-subbuild"
+  DESC = Running CMake cache editor...
+  pool = console
   restat = 1
 
 build edit_cache: phony CMakeFiles/edit_cache.util

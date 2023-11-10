@@ -1,0 +1,5 @@
+if(EXISTS "/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/utest/utest[1]_tests.cmake")
+  include("/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/utest/utest[1]_tests.cmake")
+else()
+  add_test(utest_NOT_BUILT utest_NOT_BUILT)
+endif()

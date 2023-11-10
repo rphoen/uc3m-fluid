@@ -54,22 +54,22 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/src/sim/cmake_install.cmake")
+  include("/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/sim/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/src/fluid/cmake_install.cmake")
+  include("/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/fluid/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/src/utest/cmake_install.cmake")
+  include("/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/utest/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/src/ftest/cmake_install.cmake")
+  include("/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/ftest/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
