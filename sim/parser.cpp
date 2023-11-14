@@ -79,7 +79,7 @@ int parser(int argc, char **argv) {
     Constants::np = np;
 
     // update simulation parameters
-    update_sim_params();
+    Constants::update_sim_params();
 
     // update box parameters
     Box::update_box_params();
