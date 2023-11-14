@@ -2,6 +2,8 @@
 add_library(sim
 progargs.hpp
 progargs.cpp
+parser.hpp
+parser.cpp
 grid.cpp
 grid.hpp
 block.cpp

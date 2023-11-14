@@ -676,6 +676,13 @@ build sim/CMakeFiles/sim.dir/progargs.cpp.o: CXX_COMPILER__sim_unscanned_Debug /
   OBJECT_DIR = sim/CMakeFiles/sim.dir
   OBJECT_FILE_DIR = sim/CMakeFiles/sim.dir
 
+build sim/CMakeFiles/sim.dir/parser.cpp.o: CXX_COMPILER__sim_unscanned_Debug /home/zhao/ntu/Computer$ Architecture/fluid/sim/parser.cpp || cmake_object_order_depends_target_sim
+  DEP_FILE = sim/CMakeFiles/sim.dir/parser.cpp.o.d
+  FLAGS = -g -std=c++20 -fdiagnostics-color=always
+  INCLUDES = -I"/home/zhao/ntu/Computer Architecture/fluid/PUBLIC" -I"/home/zhao/ntu/Computer Architecture/fluid/." -isystem "/home/zhao/ntu/Computer Architecture/fluid/cmake-build-debug/_deps/gsl-src/include"
+  OBJECT_DIR = sim/CMakeFiles/sim.dir
+  OBJECT_FILE_DIR = sim/CMakeFiles/sim.dir
+
 build sim/CMakeFiles/sim.dir/grid.cpp.o: CXX_COMPILER__sim_unscanned_Debug /home/zhao/ntu/Computer$ Architecture/fluid/sim/grid.cpp || cmake_object_order_depends_target_sim
   DEP_FILE = sim/CMakeFiles/sim.dir/grid.cpp.o.d
   FLAGS = -g -std=c++20 -fdiagnostics-color=always
@@ -698,7 +705,7 @@ build sim/CMakeFiles/sim.dir/block.cpp.o: CXX_COMPILER__sim_unscanned_Debug /hom
 #############################################
 # Link the static library sim/libsim.a
 
-build sim/libsim.a: CXX_STATIC_LIBRARY_LINKER__sim_Debug sim/CMakeFiles/sim.dir/progargs.cpp.o sim/CMakeFiles/sim.dir/grid.cpp.o sim/CMakeFiles/sim.dir/block.cpp.o
+build sim/libsim.a: CXX_STATIC_LIBRARY_LINKER__sim_Debug sim/CMakeFiles/sim.dir/progargs.cpp.o sim/CMakeFiles/sim.dir/parser.cpp.o sim/CMakeFiles/sim.dir/grid.cpp.o sim/CMakeFiles/sim.dir/block.cpp.o
   LANGUAGE_COMPILE_FLAGS = -g
   OBJECT_DIR = sim/CMakeFiles/sim.dir
   POST_BUILD = :
