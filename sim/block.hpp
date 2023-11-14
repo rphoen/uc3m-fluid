@@ -31,6 +31,39 @@ namespace Constants {
 class Particle {
   public:
     float px, py, pz, hvx, hvy, hvz, vx, vy, vz;
+    double density;
+    double acceleration;
+};
+
+namespace Box {
+  // Calculating the number of blocks in each dimension...
+  extern double numberX;
+  extern double numberY;
+  extern double numberZ;
+
+  // Calculating the size of grid blocks in each dimension...
+  extern double sizeX;
+  extern double sizeY;
+  extern double sizeZ;
+
+  // Determining which block a particle belongs in...
+  std::vector<int> findBlock(Particle part);
+};
+
+namespace Formulas {
+  // Repositioning particles...
+    // ........
+
+  // Increasing density...
+  void incDensity(Particle iPart, Particle jPart);
+
+  double findDistance(Particle iPart, Particle jPart);
+
+  void accelerationTransfer(Particle iPart, Particle jPart);
+
+  void processBoxCollisions(Particle iPart);
+
 };
 
 #endif
+
