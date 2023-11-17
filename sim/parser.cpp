@@ -1,5 +1,8 @@
-// #include "parser.hpp"
+#include "parser.hpp"
 #include "block.hpp"
+#include "constants.hpp"
+#include "grid.hpp"
+#include "particle.hpp"
 #include <fstream>
 #include <iostream>
 #include <locale>
@@ -61,46 +64,44 @@ int parser(int argc, char **argv) {
   while (!input_file.eof()) {
     count += 1;
     // Read particle values
-    float px = read_binary_value<float>(input_file);
-    float py = read_binary_value<float>(input_file);
-    float pz = read_binary_value<float>(input_file);
-    float hvx = read_binary_value<float>(input_file);
-    float hvy = read_binary_value<float>(input_file);
-    float hvz = read_binary_value<float>(input_file);
-    float vx = read_binary_value<float>(input_file);
-    float vy = read_binary_value<float>(input_file);
-    float vz = read_binary_value<float>(input_file);
+    std::vector<float> position;
+    std::vector<float> hv;
+    std::vector<float> velocity;
 
-    particles.push_back(Particle(px, py, pz, hvx, hvy, hvz, vx, vy, vz));
+    position.push_back(read_binary_value<float>(input_file));
+    position.push_back(read_binary_value<float>(input_file));
+    position.push_back(read_binary_value<float>(input_file));
+    hv.push_back(read_binary_value<float>(input_file));
+    hv.push_back(read_binary_value<float>(input_file));
+    hv.push_back(read_binary_value<float>(input_file));
+    velocity.push_back(read_binary_value<float>(input_file));
+    velocity.push_back(read_binary_value<float>(input_file));
+    velocity.push_back(read_binary_value<float>(input_file));
+
+    // p.set_position(position);
+    // p.set_hv(hv);
+    // p.set_velocity(velocity);
+    particles.emplace_back(Particle(position, hv, velocity));
   }
 
   if (count == np) {
-    Constants::ppm = ppm;
-    Constants::np = np;
+    // Create grid
+    Grid grid(ppm, np);
 
-    // update simulation parameters
-    Constants::update_sim_params();
-
-    // update box parameters
-    Box::update_box_params();
+    // update grid
+    grid.update_grid();
 
     // output details of file
-    // Particles per meter: 204
-    // Smoothing length: 0.00830882
-    // Particle mass: 0.00011779
-    // Grid size: 15 x 21 x 15
-    // Number of blocks: 4725
-    // Block size: 0.00866667 x 0.00857143 x 0.00866667
-    std::cout << "Particles per meter: " << Constants::ppm << std::endl;
-    std::cout << "np: " << Constants::np << std::endl;
-    std::cout << "Smoothing length: " << Constants::smoothingLength
+    std::cout << "Particles per meter: " << grid.get_ppm() << std::endl;
+    std::cout << "np: " << grid.get_np() << std::endl;
+    std::cout << "Smoothing length: " << grid.get_smoothingLength()
               << std::endl;
-    std::cout << "Particle mass: " << Constants::particleMass << std::endl;
-    std::cout << "Grid size: " << Box::numberX << " x " << Box::numberY << " x "
-              << Box::numberZ << std::endl;
-    std::cout << "Number of blocks: " << Box::numBlocks << std::endl;
-    std::cout << "Block size: " << Box::sizeX << " x " << Box::sizeY << " x "
-              << Box::sizeZ << std::endl;
+    std::cout << "Particle mass: " << grid.get_particleMass() << std::endl;
+    std::cout << "Grid size: " << grid.get_numberX() << " x "
+              << grid.get_numberY() << " x " << grid.get_numberZ() << std::endl;
+    std::cout << "Number of blocks: " << grid.get_numBlocks() << std::endl;
+    std::cout << "Block size: " << grid.get_sizeX() << " x " << grid.get_sizeY()
+              << " x " << grid.get_sizeZ() << std::endl;
 
   } else {
     std::cout << "Error: Number of particles mismatch. Header: " << np
