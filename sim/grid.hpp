@@ -71,11 +71,14 @@ public:
   double get_accTransConstant1();
   double get_accTransConstant2();
 
+  // block functions
+  void add_particle_to_block(Particle p);
+
   // Update variables
   void update_grid();
 
   // Find the block that a particle belongs in
-  std::vector<int> findBlock(float px, float py, float pz);
+  std::vector<int> findBlock(std::vector<float> position);
 };
 
 #endif // GRID_HPP

@@ -58,8 +58,10 @@ int parser(int argc, char **argv) {
 
   int count = -1; // count number of particles
 
-  // Initialize array of Particles
-  std::vector<Particle> particles;
+  // Create Grid
+  Grid grid(ppm, np);
+  // update grid
+  grid.update_grid();
 
   while (!input_file.eof()) {
     count += 1;
@@ -78,18 +80,12 @@ int parser(int argc, char **argv) {
     velocity.push_back(read_binary_value<float>(input_file));
     velocity.push_back(read_binary_value<float>(input_file));
 
-    // p.set_position(position);
-    // p.set_hv(hv);
-    // p.set_velocity(velocity);
-    particles.emplace_back(Particle(position, hv, velocity));
+    // Create particle
+    Particle p(position, hv, velocity);
+    grid.add_particle_to_block(p);
   }
 
   if (count == np) {
-    // Create grid
-    Grid grid(ppm, np);
-
-    // update grid
-    grid.update_grid();
 
     // output details of file
     std::cout << "Particles per meter: " << grid.get_ppm() << std::endl;

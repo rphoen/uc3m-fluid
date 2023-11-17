@@ -5,13 +5,7 @@
 
 // Particle class
 class Particle {
-public:
-  // Constructor and Destructor
-  Particle(std::vector<float> position, std::vector<float> hv,
-           std::vector<float> velocity);
-
-  ~Particle();
-
+private:
   // Member variables
   std::vector<float> position;
   std::vector<float> hv;
@@ -19,7 +13,13 @@ public:
   double density;
   std::vector<double> acceleration;
 
-private:
+public:
+  // Constructor and Destructor
+  Particle(std::vector<float> position, std::vector<float> hv,
+           std::vector<float> velocity);
+
+  ~Particle();
+
   // Getters and setters for each variables
   std::vector<float> get_position();
   void set_position(std::vector<float> position);

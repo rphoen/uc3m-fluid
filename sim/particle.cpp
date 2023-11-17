@@ -48,3 +48,5 @@ std::vector<double> Particle::get_acceleration() { return acceleration; }
 double Particle::get_ax() { return acceleration[0]; }
 double Particle::get_ay() { return acceleration[1]; }
 double Particle::get_az() { return acceleration[2]; }
+
+void set_density(double density) { density = density; }

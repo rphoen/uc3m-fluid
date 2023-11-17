@@ -33,6 +33,20 @@ double Grid::get_densTransConstant() { return densTransConstant; }
 double Grid::get_accTransConstant1() { return accTransConstant1; }
 double Grid::get_accTransConstant2() { return accTransConstant2; }
 
+// block functions
+void Grid::add_particle_to_block(Particle p) {
+  std::vector<int> key = findBlock(p.get_px(), p.get_py(), p.get_pz());
+
+  if (get_blocks().count(key) > 0) {
+    // Key is present
+    blocks[key].addParticle(p);
+  } else {
+    // Key is not present
+    Block b;
+    blocks.insert(std::make_pair(key, b));
+  }
+}
+
 // update simulation parameters
 void Grid::update_grid() {
   particleMass = Constants::fluidDensity / pow(ppm, 3);
