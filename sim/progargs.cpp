@@ -29,7 +29,7 @@ int progargs(int argc, char **argv) {
       return -3;
     }
 
-    // check if input file can be opened for reading
+    // check if output file can be opened for writing
     std::ifstream outfile(argv[3]);
     if (outfile.is_open()) {
       outfile.close();
