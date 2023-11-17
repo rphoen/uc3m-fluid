@@ -1,11 +1,10 @@
 # UC3M Computer Arch 23/24 Sem 1: Fluid Simulation
 
-### To build, run this in root folder or just press button in CLion
-
-make
+### To build
 
 ```
-cmake --build cmake-build-debug --target fluid -j 8
+mkdir cmake-build-debug && cd cmake-build-debug && cmake ..
+cmake --build cmake-build-debug
 ```
 
 run
