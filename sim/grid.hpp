@@ -1,10 +1,8 @@
 #ifndef GRID_HPP
 #define GRID_HPP
-#include "hash.cpp"
 #include "block.hpp"
+#include "hash.cpp"
 #include <unordered_map>
-
-
 
 // Grid class
 class Grid {
@@ -12,7 +10,8 @@ private:
   // All the blocks in the grid
   std::unordered_map<std::vector<int>, Block, hashing::vHash> blocks;
 
-  // Information from initial file and the simulation constants that depend on them
+  // Information from initial file and the simulation constants that depend on
+  // them
   float ppm;
   int np;
 
@@ -81,7 +80,7 @@ public:
   void findAdjBlocks(Block centerBlock) const;
 
   // block functions
-  void add_particle_to_block(const Particle& p);
+  void add_particle_to_block(const Particle &p);
 
   // Update variables
   void update_grid();

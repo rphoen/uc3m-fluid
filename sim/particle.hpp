@@ -7,6 +7,7 @@
 class Particle {
 private:
   // Member variables
+  int id;
   std::vector<float> position;
   std::vector<float> hv;
   std::vector<float> velocity;
@@ -16,7 +17,7 @@ private:
 
 public:
   // Constructor and Destructor
-  Particle(std::vector<float> position, std::vector<float> hv,
+  Particle(int id, std::vector<float> position, std::vector<float> hv,
            std::vector<float> velocity);
 
   ~Particle();
@@ -33,7 +34,6 @@ public:
   [[nodiscard]] float get_hvx() const;
   [[nodiscard]] float get_hvy() const;
   [[nodiscard]] float get_hvz() const;
-
 
   std::vector<float> get_velocity();
   void set_velocity(std::vector<float> velocity);

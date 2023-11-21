@@ -1,12 +1,4 @@
 #include "parser.hpp"
-#include "simulation.hpp"
-#include "block.hpp"
-#include "constants.hpp"
-#include "grid.hpp"
-#include "particle.hpp"
-#include <fstream>
-#include <iostream>
-#include <locale>
 
 using namespace std;
 
@@ -55,7 +47,7 @@ int parser(char **argv) {
 
   // Read header vales
   auto ppm = read_binary_value<float>(input_file); // particles per meter
-  int np = read_binary_value<int>(input_file);      // number of particles
+  int np = read_binary_value<int>(input_file);     // number of particles
 
   int count = -1; // count number of particles
 
@@ -82,7 +74,7 @@ int parser(char **argv) {
     velocity.push_back(read_binary_value<float>(input_file));
 
     // Create particle
-    Particle p(position, hv, velocity);
+    Particle p(count, position, hv, velocity);
     grid.add_particle_to_block(p);
   }
 
@@ -92,8 +84,6 @@ int parser(char **argv) {
   }
 
   if (count == np) {
-
-    // output details of file
     std::cout << "Particles per meter: " << grid.get_ppm() << std::endl;
     std::cout << "np: " << grid.get_np() << std::endl;
     std::cout << "Smoothing length: " << grid.get_smoothingLength()
@@ -105,8 +95,7 @@ int parser(char **argv) {
     std::cout << "Block size: " << grid.get_sizeX() << " x " << grid.get_sizeY()
               << " x " << grid.get_sizeZ() << std::endl;
 
-    for (int i = 0; i < nts; i++)
-    {
+    for (int i = 0; i < nts; i++) {
       simulateOneStep(grid);
     }
 
@@ -115,13 +104,19 @@ int parser(char **argv) {
               << ", Found: " << count << std::endl;
   }
 
+  // Sort all the particles
+  std::vector<Particle> particles;
+  for (auto block : grid.get_blocks()) {
+    std::vector<Particle> temp = block.second.getParticles();
+    particles.insert(particles.end(), temp.begin(), temp.end());
+  }
+  mergeSort(particles, 0, particles.size() - 1);
 
   // Now, need to write all the new particle information into the output files
   write_binary_value(ppm, output_file);
   write_binary_value(np, output_file);
 
-  for (auto particle : grid.get_particles())
-  {
+  for (auto particle : particles) {
     float px = particle.get_px();
     float py = particle.get_py();
     float pz = particle.get_pz();
