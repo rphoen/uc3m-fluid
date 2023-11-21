@@ -37,13 +37,16 @@ public:
                             double accTransConstant1, double accTransConstant2);
 
   // Particle motion
-  static void particleMotion(Particle part);
+  void particleMotion(Particle part);
 
   // Process box collisions
-  static void boxCollisions(Particle part);
+  void boxCollisions(Particle part);
 
   // Process boundary collisions
-  static void boundaryCollisions(Particle part);
+  void boundaryCollisions(Particle part);
+
+  // Copy constructor
+  Block(const Block& block);
 
   // Destructor
   ~Block();

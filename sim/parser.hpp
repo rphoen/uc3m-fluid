@@ -13,17 +13,13 @@
 int parser(char **argv);
 
 // read binary value from file
-Grid readInput(const std::string& inputfile);
-
-Particle readParticle(std::ifstream &input_file, int count);
+Grid readInput(std::string inputfile);
 
 // print parameters
 int printParameters(Grid &grid);
 
 // write binary value to file
-void writeOutput(const std::string& outputfile, Grid &grid);
-
-void writeParticle(Particle particle, std::ofstream &output_file);
+void writeOutput(std::string outputfile, Grid &grid);
 
 // mergesort for particles array
 void merge(std::vector<Particle> &particles, int left, int middle, int right);

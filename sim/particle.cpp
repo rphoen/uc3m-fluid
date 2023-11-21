@@ -11,6 +11,8 @@ Particle::Particle(int particleID, std::vector<float> partPosition,
 // Destructor
 Particle::~Particle() = default;
 
+Particle::Particle(const Particle& other) = default;
+
 // Getters and setters for each variables
 int Particle::get_id() const { return id; }
 
