@@ -16,6 +16,6 @@ namespace Constants {
   extern std::vector<double> externalAcceleration;
   extern std::vector<double> boxUpperBound;
   extern std::vector<double> boxLowerBound;
-}; // namespace Constants
+} // namespace Constants
 
 #endif  // FLUID_CONSTANTS_HPP

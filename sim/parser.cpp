@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include "simulation.hpp"
 #include "block.hpp"
 #include "constants.hpp"
 #include "grid.hpp"
@@ -38,7 +39,7 @@ void write_binary_value(T value, std::ostream &os) {
 }
 
 int parser(int argc, char **argv) {
-  int nts = atoi(argv[1]); // number of time steps
+  int nts = std::stoi(argv[1]); // number of time steps
   std::string inputfile = argv[2];
   std::string outputfile = argv[3];
 
@@ -53,7 +54,7 @@ int parser(int argc, char **argv) {
   std::ofstream output_file(outputfile, std::ios::binary);
 
   // Read header vales
-  float ppm = read_binary_value<float>(input_file); // particles per meter
+  auto ppm = read_binary_value<float>(input_file); // particles per meter
   int np = read_binary_value<int>(input_file);      // number of particles
 
   int count = -1; // count number of particles
@@ -99,9 +100,42 @@ int parser(int argc, char **argv) {
     std::cout << "Block size: " << grid.get_sizeX() << " x " << grid.get_sizeY()
               << " x " << grid.get_sizeZ() << std::endl;
 
+    for (int i = 0; i < nts; i++)
+    {
+      simulateOneStep(grid);
+    }
+
   } else {
     std::cout << "Error: Number of particles mismatch. Header: " << np
               << ", Found: " << count << std::endl;
+  }
+
+
+  // Now, need to write all the new particle information into the output files
+  write_binary_value(ppm, output_file);
+  write_binary_value(np, output_file);
+
+  for (auto particle : grid.get_particles())
+  {
+    float px = particle.get_px();
+    float py = particle.get_py();
+    float pz = particle.get_pz();
+    float hvx = particle.get_hvx();
+    float hvy = particle.get_hvy();
+    float hvz = particle.get_hvz();
+    float ax = particle.get_ax();
+    float ay = particle.get_ay();
+    float az = particle.get_az();
+
+    write_binary_value(px, output_file);
+    write_binary_value(py, output_file);
+    write_binary_value(pz, output_file);
+    write_binary_value(hvx, output_file);
+    write_binary_value(hvy, output_file);
+    write_binary_value(hvz, output_file);
+    write_binary_value(ax, output_file);
+    write_binary_value(ay, output_file);
+    write_binary_value(az, output_file);
   }
 
   // Close files

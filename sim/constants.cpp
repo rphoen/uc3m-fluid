@@ -17,4 +17,4 @@ namespace Constants {
   std::vector<double> boxUpperBound = {0.065, 0.1, 0.065};
   std::vector<double> boxLowerBound = {-0.065, -0.08, -0.065};
 
-}; // namespace Constants
+} // namespace Constants

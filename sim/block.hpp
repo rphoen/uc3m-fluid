@@ -1,6 +1,7 @@
 #ifndef BLOCK_CPP
 #define BLOCK_CPP
 
+#include "grid.hpp"
 #include "particle.hpp"
 #include <cmath>
 #include <vector>
@@ -9,7 +10,7 @@
   class Block {
   public:
     // Constructor
-    Block(std::vector<int> index);
+    explicit Block(std::vector<int> index, Grid* simGrid);
 
     // Member particle getter
     std::vector<Particle> getParticles();
@@ -17,26 +18,26 @@
     // Add particle to block
     void addParticle(const Particle& part);
 
-    // Get index
-    std::vector<int> getIndex();
+    // Finds adjacent blocks
+    void findAdjBlocks(auto numX, auto numY, auto numZ, Grid* simGrid);
 
     // Increasing density...
-    void incDensity(const Particle& part, Grid grid);
+    void incDensity(Particle& part, const Grid& grid);
 
     // Distance formula ..
-    double findDistance(Particle iPart, Particle jPart);
+    static double findDistance(const Particle& iPart, const Particle& jPart);
 
     // Transferring accelerations
-    void accelerationTransfer();
+    void accelerationTransfer(Particle part, const Grid& grid);
 
     // Particle motion
-    void particleMotion();
+    static void particleMotion(Particle part);
 
     // Process box collisions
-    void boxCollisions();
+    static void boxCollisions(Particle part);
 
     // Process boundary collisions
-    void boundaryCollisions();
+    static void boundaryCollisions(Particle part);
 
     // Destructor
     ~Block();

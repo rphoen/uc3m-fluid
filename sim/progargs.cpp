@@ -9,12 +9,13 @@ int progargs(int argc, char **argv) {
     return -1;
   } else {
     // check if nts is integer, if not error code -1
-    if (atoi(argv[1]) == 0) {
+    // Need to use a cast here
+    if (std::stoi(argv[1]) == 0) {
       std::cout << "Error: Time steps must be numeric." << std::endl;
       return -1;
     }
     // check if nts is negative
-    if (atoi(argv[1]) <= 0) {
+    if (std::stoi(argv[1]) <= 0) {
       std::cout << "Error: Invalid number of time steps." << std::endl;
       return -2;
     }
