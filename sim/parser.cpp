@@ -68,24 +68,7 @@ Grid readInput(std::string inputfile) {
 
   while (!input_file.eof()) {
     count += 1;
-    // Read particle values
-    std::vector<float> position;
-    std::vector<float> hv;
-    std::vector<float> velocity;
-
-    position.push_back(read_binary_value<float>(input_file));
-    position.push_back(read_binary_value<float>(input_file));
-    position.push_back(read_binary_value<float>(input_file));
-    hv.push_back(read_binary_value<float>(input_file));
-    hv.push_back(read_binary_value<float>(input_file));
-    hv.push_back(read_binary_value<float>(input_file));
-    velocity.push_back(read_binary_value<float>(input_file));
-    velocity.push_back(read_binary_value<float>(input_file));
-    velocity.push_back(read_binary_value<float>(input_file));
-
-    // Create particle
-    Particle p(count, position, hv, velocity);
-    grid.add_particle_to_block(p);
+    grid.add_particle_to_block(readParticle(input_file, count));
   }
   input_file.close();
 
@@ -95,6 +78,28 @@ Grid readInput(std::string inputfile) {
   }
 
   return grid;
+}
+
+Particle readParticle(std::ifstream &input_file, int count) {
+  // Read particle values
+  std::vector<float> position;
+  std::vector<float> hv;
+  std::vector<float> velocity;
+
+  position.push_back(read_binary_value<float>(input_file));
+  position.push_back(read_binary_value<float>(input_file));
+  position.push_back(read_binary_value<float>(input_file));
+  hv.push_back(read_binary_value<float>(input_file));
+  hv.push_back(read_binary_value<float>(input_file));
+  hv.push_back(read_binary_value<float>(input_file));
+  velocity.push_back(read_binary_value<float>(input_file));
+  velocity.push_back(read_binary_value<float>(input_file));
+  velocity.push_back(read_binary_value<float>(input_file));
+
+  // Create particle
+  Particle p(count, position, hv, velocity);
+
+  return p;
 }
 
 // print parameters
@@ -133,82 +138,106 @@ void writeOutput(std::string outputfile, Grid &grid) {
   write_binary_value(grid.get_np(), output_file);
 
   for (auto particle : particles) {
-    float px = particle.get_px();
-    float py = particle.get_py();
-    float pz = particle.get_pz();
-    float hvx = particle.get_hvx();
-    float hvy = particle.get_hvy();
-    float hvz = particle.get_hvz();
-    float ax = particle.get_ax();
-    float ay = particle.get_ay();
-    float az = particle.get_az();
-
-    write_binary_value(px, output_file);
-    write_binary_value(py, output_file);
-    write_binary_value(pz, output_file);
-    write_binary_value(hvx, output_file);
-    write_binary_value(hvy, output_file);
-    write_binary_value(hvz, output_file);
-    write_binary_value(ax, output_file);
-    write_binary_value(ay, output_file);
-    write_binary_value(az, output_file);
+    writeParticle(particle, output_file);
   }
-
-  // Now, need to write all the new particle information into the output files
-  //   writeOutput(output_file, particles);
-  //
-
   output_file.close();
+}
+
+void writeParticle(Particle particle, std::ofstream &output_file) {
+  float px = particle.get_px();
+  float py = particle.get_py();
+  float pz = particle.get_pz();
+  float hvx = particle.get_hvx();
+  float hvy = particle.get_hvy();
+  float hvz = particle.get_hvz();
+  float ax = particle.get_ax();
+  float ay = particle.get_ay();
+  float az = particle.get_az();
+
+  write_binary_value(px, output_file);
+  write_binary_value(py, output_file);
+  write_binary_value(pz, output_file);
+  write_binary_value(hvx, output_file);
+  write_binary_value(hvy, output_file);
+  write_binary_value(hvz, output_file);
+  write_binary_value(ax, output_file);
+  write_binary_value(ay, output_file);
+  write_binary_value(az, output_file);
 }
 
 // Merge sort ascending order by particle.get_id()
 void merge(std::vector<Particle> &particles, int left, int middle, int right) {
-  int i, j, k;
   int n1 = middle - left + 1;
   int n2 = right - middle;
 
-  /* create temp arrays */
-  std::vector<Particle> L;
-  std::vector<Particle> R;
+  std::vector<Particle> L(particles.begin() + left,
+                          particles.begin() + left + n1);
+  std::vector<Particle> R(particles.begin() + middle + 1,
+                          particles.begin() + middle + 1 + n2);
 
-  /* Copy data to temp arrays L[] and R[] */
-  for (i = 0; i < n1; i++)
-    L.emplace_back(particles[left + i]);
-  for (j = 0; j < n2; j++)
-    R.emplace_back(particles[middle + 1 + j]);
+  int i = 0, j = 0, k = left;
 
-  /* Merge the temp arrays back into arr[l..r]*/
-  i = 0;    // Initial index of first subarray
-  j = 0;    // Initial index of second subarray
-  k = left; // Initial index of merged subarray
   while (i < n1 && j < n2) {
-    if (L[i].get_id() <= R[j].get_id()) {
-      particles[k] = L[i];
-      i++;
-    } else {
-      particles[k] = R[j];
-      j++;
-    }
-    k++;
+    particles[k++] = (L[i].get_id() <= R[j].get_id()) ? L[i++] : R[j++];
   }
 
-  /* Copy the remaining elements of L[], if there are any */
   while (i < n1) {
-    particles[k] = L[i];
-    i++;
-    k++;
+    particles[k++] = L[i++];
   }
 
-  /* Copy the remaining elements of R[], if there are any */
   while (j < n2) {
-    particles[k] = R[j];
-    j++;
-    k++;
+    particles[k++] = R[j++];
   }
-
-  L.clear();
-  R.clear();
 }
+
+// void merge(std::vector<Particle> &particles, int left, int middle, int right)
+// {
+//   int i, j, k;
+//   int n1 = middle - left + 1;
+//   int n2 = right - middle;
+//
+//   /* create temp arrays */
+//   std::vector<Particle> L;
+//   std::vector<Particle> R;
+//
+//   /* Copy data to temp arrays L[] and R[] */
+//   for (i = 0; i < n1; i++)
+//     L.emplace_back(particles[left + i]);
+//   for (j = 0; j < n2; j++)
+//     R.emplace_back(particles[middle + 1 + j]);
+//
+//   /* Merge the temp arrays back into arr[l..r]*/
+//   i = 0;    // Initial index of first subarray
+//   j = 0;    // Initial index of second subarray
+//   k = left; // Initial index of merged subarray
+//   while (i < n1 && j < n2) {
+//     if (L[i].get_id() <= R[j].get_id()) {
+//       particles[k] = L[i];
+//       i++;
+//     } else {
+//       particles[k] = R[j];
+//       j++;
+//     }
+//     k++;
+//   }
+//
+//   /* Copy the remaining elements of L[], if there are any */
+//   while (i < n1) {
+//     particles[k] = L[i];
+//     i++;
+//     k++;
+//   }
+//
+//   /* Copy the remaining elements of R[], if there are any */
+//   while (j < n2) {
+//     particles[k] = R[j];
+//     j++;
+//     k++;
+//   }
+//
+//   L.clear();
+//   R.clear();
+// }
 
 void mergeSort(std::vector<Particle> &particles, int left, int right) {
   if (left < right) {
