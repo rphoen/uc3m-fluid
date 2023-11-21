@@ -78,8 +78,7 @@ int parser(char **argv) {
     grid.add_particle_to_block(p);
   }
 
-  for (const auto& centerBlock : grid.get_blocks())
-  {
+  for (const auto &centerBlock : grid.get_blocks()) {
     grid.findAdjBlocks(centerBlock.second);
   }
 
@@ -143,4 +142,67 @@ int parser(char **argv) {
   output_file.close();
 
   return 0;
+}
+
+// Merge sort ascending order by particle.get_id()
+void merge(std::vector<Particle> &particles, int left, int middle, int right) {
+  int i, j, k;
+  int n1 = middle - left + 1;
+  int n2 = right - middle;
+
+  /* create temp arrays */
+  std::vector<Particle> L;
+  std::vector<Particle> R;
+
+  /* Copy data to temp arrays L[] and R[] */
+  for (i = 0; i < n1; i++)
+    L.emplace_back(particles[left + i]);
+  for (j = 0; j < n2; j++)
+    R.emplace_back(particles[middle + 1 + j]);
+
+  /* Merge the temp arrays back into arr[l..r]*/
+  i = 0;    // Initial index of first subarray
+  j = 0;    // Initial index of second subarray
+  k = left; // Initial index of merged subarray
+  while (i < n1 && j < n2) {
+    if (L[i].get_id() <= R[j].get_id()) {
+      particles[k] = L[i];
+      i++;
+    } else {
+      particles[k] = R[j];
+      j++;
+    }
+    k++;
+  }
+
+  /* Copy the remaining elements of L[], if there are any */
+  while (i < n1) {
+    particles[k] = L[i];
+    i++;
+    k++;
+  }
+
+  /* Copy the remaining elements of R[], if there are any */
+  while (j < n2) {
+    particles[k] = R[j];
+    j++;
+    k++;
+  }
+
+  L.clear();
+  R.clear();
+}
+
+void mergeSort(std::vector<Particle> &particles, int left, int right) {
+  if (left < right) {
+    // Same as (l+r)/2, but avoids overflow for
+    // large l and h
+    int middle = left + (right - left) / 2;
+
+    // Sort first and second halves
+    mergeSort(particles, left, middle);
+    mergeSort(particles, middle + 1, right);
+
+    merge(particles, left, middle, right);
+  }
 }

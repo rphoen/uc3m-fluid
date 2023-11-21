@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
   progargs(argc, argv);
 
   // parsing file
-  parser(argc, argv);
+  parser(argv);
 
   return 0;
 }

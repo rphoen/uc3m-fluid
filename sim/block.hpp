@@ -11,7 +11,7 @@
 class Block {
 public:
   // Constructor
-  explicit Block(std::vector<int> index, Grid *simGrid);
+  explicit Block(std::vector<int> index);
 
   // Member particle getter
   std::vector<Particle> getParticles();
@@ -26,13 +26,15 @@ public:
   void addAdjacentBlock(const Block &adjBlock);
 
   // Increasing density...
-  void incDensity(Particle &part, const Grid &grid);
+  void incDensity(Particle &part, double slSq, double slSixth,
+                  double densTransConstant);
 
   // Distance formula ..
   static double findDistance(const Particle &iPart, const Particle &jPart);
 
   // Transferring accelerations
-  void accelerationTransfer(Particle part, const Grid &grid);
+  void accelerationTransfer(Particle part, double slSq,
+                            double accTransConstant1, double accTransConstant2);
 
   // Particle motion
   static void particleMotion(Particle part);

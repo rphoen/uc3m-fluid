@@ -49,7 +49,8 @@ public:
   ~Grid();
 
   // Getters and setters for each variable
-  std::unordered_map<std::vector<int>, Block, hashing::vHash> get_blocks();
+  std::unordered_map<std::vector<int>, Block, hashing::vHash>
+  get_blocks() const;
 
   [[nodiscard]] float get_ppm() const;
   [[nodiscard]] int get_np() const;

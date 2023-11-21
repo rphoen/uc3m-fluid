@@ -10,8 +10,11 @@
 #include <locale>
 #include <vector>
 
-int parser(int argc, char **argv);
+int parser(char **argv);
 
-void mergeSort(std::vector<Particle> &particles, int l, int r);
+// mergesort for particles array
+void merge(std::vector<Particle> &particles, int left, int middle, int right);
+
+void mergeSort(std::vector<Particle> &particles, int left, int right);
 
 #endif // PARSER_H

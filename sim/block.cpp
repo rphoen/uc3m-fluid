@@ -24,7 +24,8 @@ void Block::addAdjacentBlock(const Block &adjBlock) {
 
 // Increasing density between a given particle and every particle in the
 // adjacent blocks
-void Block::incDensity(Particle &part, const Grid &grid) {
+void Block::incDensity(Particle &part, double slSq, double slSixth,
+                       double densTransConstant) {
   auto px = part.get_px();
   auto py = part.get_py();
   auto pz = part.get_pz();
@@ -39,13 +40,11 @@ void Block::incDensity(Particle &part, const Grid &grid) {
       auto yDiffSq = pow((py - py2), 2);
       auto zDiffSq = pow((pz - pz2), 2);
       auto diffSum = xDiffSq + yDiffSq + zDiffSq;
-      auto slSq = grid.get_slSq();
 
       if (diffSum < slSq) {
         double densityChange = pow((slSq - diffSum), 3);
         double newDensity = part.get_density() + densityChange;
-        double densTransformation =
-            (newDensity + grid.get_slSixth()) * grid.get_densTransConstant();
+        double densTransformation = (newDensity + slSixth) * densTransConstant;
         part.set_density(densTransformation);
       }
       // else if (vecNorm >= Constants::slSq) {
@@ -74,7 +73,9 @@ double Block::findDistance(const Particle &iPart, const Particle &jPart) {
 
 // Transfer accelerations between a given particle and every particle in the
 // adjacent blocks NEED TO MAKE SHORTER
-void Block::accelerationTransfer(Particle part, const Grid &grid) {
+void Block::accelerationTransfer(Particle part, double slSq,
+                                 double accTransConstant1,
+                                 double accTransConstant2) {
   // double distance = findDistance(iPart, jPart);
   auto px1 = part.get_px();
   auto py1 = part.get_py();
@@ -92,35 +93,31 @@ void Block::accelerationTransfer(Particle part, const Grid &grid) {
       auto yDiffSq = pow((py1 - py2), 2);
       auto zDiffSq = pow((pz1 - pz2), 2);
       auto diffSum = xDiffSq + yDiffSq + zDiffSq;
-      auto slSq = grid.get_slSq();
 
       if (diffSum < slSq) // Update the acceleration
       {
         double distance = findDistance(part, adjPart);
         // Change this to helper function eventually
-        auto xAccChange =
-            (((px1 - px2) * grid.get_accTransConstant1() *
-              ((pow((grid.get_slSq() - distance), 2)) / distance) *
-              (part.get_density() + adjPart.get_density() -
-               (2 * Constants::fluidDensity)) *
-              grid.get_accTransConstant2()) /
-             (part.get_density() * adjPart.get_density()));
+        auto xAccChange = (((px1 - px2) * accTransConstant1 *
+                            ((pow((slSq - distance), 2)) / distance) *
+                            (part.get_density() + adjPart.get_density() -
+                             (2 * Constants::fluidDensity)) *
+                            accTransConstant2) /
+                           (part.get_density() * adjPart.get_density()));
 
-        auto yAccChange =
-            (((py1 - py2) * grid.get_accTransConstant1() *
-              ((pow((grid.get_slSq() - distance), 2)) / distance) *
-              (part.get_density() + adjPart.get_density() -
-               (2 * Constants::fluidDensity)) *
-              grid.get_accTransConstant2()) /
-             (part.get_density() * adjPart.get_density()));
+        auto yAccChange = (((py1 - py2) * accTransConstant1 *
+                            ((pow((slSq - distance), 2)) / distance) *
+                            (part.get_density() + adjPart.get_density() -
+                             (2 * Constants::fluidDensity)) *
+                            accTransConstant2) /
+                           (part.get_density() * adjPart.get_density()));
 
-        auto zAccChange =
-            (((pz1 - pz2) * grid.get_accTransConstant1() *
-              ((pow((grid.get_slSq() - distance), 2)) / distance) *
-              (part.get_density() + adjPart.get_density() -
-               (2 * Constants::fluidDensity)) *
-              grid.get_accTransConstant2()) /
-             (part.get_density() * adjPart.get_density()));
+        auto zAccChange = (((pz1 - pz2) * accTransConstant1 *
+                            ((pow((slSq - distance), 2)) / distance) *
+                            (part.get_density() + adjPart.get_density() -
+                             (2 * Constants::fluidDensity)) *
+                            accTransConstant2) /
+                           (part.get_density() * adjPart.get_density()));
 
         if (!part.hasAccelerated()) {
           std::vector<double> partNew = {(part.get_ax() + xAccChange),
