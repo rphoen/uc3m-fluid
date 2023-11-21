@@ -12,3 +12,11 @@ run
 ```
 cmake-build-debug/fluid/fluid 1 small.fld out/test.fld
 ```
+
+### Clang-tidy fixes
+
+np -> npnp
+px, py, pz -> posx, posy, posz
+ax, ay, az -> accx, accy, accz
+hv -> vectorhv
+hvx -> vectorhvx,
