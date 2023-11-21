@@ -1,6 +1,5 @@
 #ifndef FLUID_PARTICLE_HPP
 #define FLUID_PARTICLE_HPP
-
 #include "constants.hpp"
 #include <utility>
 #include <vector>
@@ -22,8 +21,16 @@ public:
   Particle(int id, std::vector<float> position, std::vector<float> hv,
            std::vector<float> velocity);
 
-
   ~Particle();
+
+  // Copy constructors, move constructors
+  Particle(const Particle& other);
+
+  Particle& operator=(const Particle& other) = default;
+
+  Particle(Particle&& other) = default;
+
+  Particle& operator=(Particle&& other) = default;
 
   [[nodiscard]] int get_id() const;
   // Getters and setters for each variables

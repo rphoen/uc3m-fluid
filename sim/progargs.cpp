@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
 
-int progargs(int argc, char **argv) {
+int progargs(int argc, std::array<char*, 4> argv) {
   if (argc != 4) { // Check that there are 4 arguments
     std::cerr << "Error: Invalid number of arguments: " << argc - 1 << "." << "\n";
     return -1;}
