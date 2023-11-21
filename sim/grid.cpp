@@ -3,15 +3,22 @@
 #include "constants.hpp"
 #include <unordered_map>
 
+const float threeonefive = 315.0;
+const int sixtyfour = 64;
+const int six = 6;
+const int nine = 9;
+const int fifteen = 15;
+const int fourtyfive = 45;
+
 // Constructor and Destructor
-Grid::Grid(float ppm, int np) : ppm(ppm), np(np) {
+Grid::Grid(float ppm, int np) : ppm(ppm), np(np), sizeX((Constants::boxUpperBound[0] - Constants::boxLowerBound[0]) / numberX) {
   particleMass = Constants::fluidDensity / pow(ppm, 3);
   smoothingLength = Constants::radiusMultiplier / ppm;
 
   slSq = pow(smoothingLength, 2);
   slCu = pow(smoothingLength, 3);
-  slSixth = pow(smoothingLength, 6);
-  slNinth = pow(smoothingLength, 9);
+  slSixth = pow(smoothingLength, six);
+  slNinth = pow(smoothingLength, nine);
 
   numberX = (Constants::boxUpperBound[0] - Constants::boxLowerBound[0]) /
             smoothingLength;
@@ -23,16 +30,16 @@ Grid::Grid(float ppm, int np) : ppm(ppm), np(np) {
 
   numBlocks = numberX * numberY * numberZ;
 
-  sizeX = (Constants::boxUpperBound[0] - Constants::boxLowerBound[0]) / numberX;
+
   sizeY = (Constants::boxUpperBound[1] - Constants::boxLowerBound[1]) / numberY;
   sizeZ = (Constants::boxUpperBound[2] - Constants::boxLowerBound[2]) / numberZ;
   sizesVector = {sizeX, sizeY, sizeZ};
 
-  densTransConstant = (315.0 / 64 * M_PI * slNinth) * particleMass;
-  accTransConstant1 = (15 / M_PI * slSixth) *
+  densTransConstant = (threeonefive / sixtyfour * M_PI * slNinth) * particleMass;
+  accTransConstant1 = (fifteen / M_PI * slSixth) *
                       ((3 * particleMass * Constants::stiffnessPressure) / 2);
   accTransConstant2 =
-      (45 / M_PI * slSixth) * Constants::viscosity * particleMass;
+      (fourtyfive / M_PI * slSixth) * Constants::viscosity * particleMass;
 
   blocks = std::unordered_map<std::vector<int>, Block, hashing::vHash>();
   update_grid();
@@ -70,16 +77,16 @@ double Grid::get_accTransConstant2() const { return accTransConstant2; }
 
 // block functions
 void Grid::add_particle_to_block(const Particle &particle) {
-  std::vector<int> key = findBlock(particle);
+  std::vector<int> const key = findBlock(particle);
 
-  auto it = blocks.find(key);
+  auto itr = blocks.find(key);
 
-  if (it != blocks.end()) {
+  if (itr != blocks.end()) {
     // Already exists
-    auto targetBlock = it->second;
+    auto targetBlock = itr->second;
     targetBlock.addParticle(particle);
   } else {
-    Block newBlock(key);
+    Block const newBlock(key);
     blocks.insert({key, newBlock});
   }
   //  if (get_blocks().count(key) > 0) {
@@ -118,11 +125,11 @@ void Grid::update_grid() {
   sizeZ = (Constants::boxUpperBound[2] - Constants::boxLowerBound[2]) / numberZ;
   sizesVector = {sizeX, sizeY, sizeZ};
 
-  densTransConstant = (315.0 / 64 * M_PI * slNinth) * particleMass;
-  accTransConstant1 = (15 / M_PI * slSixth) *
+  densTransConstant = (threeonefive / sixtyfour * M_PI * slNinth) * particleMass;
+  accTransConstant1 = (fifteen / M_PI * slSixth) *
                       ((3 * particleMass * Constants::stiffnessPressure) / 2);
   accTransConstant2 =
-      (45 / M_PI * slSixth) * Constants::viscosity * particleMass;
+      (fourtyfive / M_PI * slSixth) * Constants::viscosity * particleMass;
 }
 
 // Find the block that a particle belongs in
@@ -164,17 +171,17 @@ void Grid::findAdjBlocks(Block centerBlock) const {
   for (int i = -1; i <= 1; i++) {
     for (int j = -1; j <= 1; j++) {
       for (int k = -1; k <= 1; k++) {
-        int newX = centerIndex[0] + i;
-        int newY = centerIndex[1] + j;
-        int newZ = centerIndex[2] + k;
+        int const newX = centerIndex[0] + i;
+        int const newY = centerIndex[1] + j;
+        int const newZ = centerIndex[2] + k;
 
         // Want to add a check here to see if the potential adjacent blocks
         // actually exist within the grid If it does, we want to add it to the
         // result
         if (newX >= 0 && newX <= (numberX - 1) && newY >= 0 &&
             newY <= (numberY - 1) && newZ >= 0 && newZ <= (numberZ - 1)) {
-          std::vector<int> adjBlockIndex = {newX, newY, newZ};
-          Block adjBlock(adjBlockIndex);
+          std::vector<int> const adjBlockIndex = {newX, newY, newZ};
+          Block const adjBlock(adjBlockIndex);
           { centerBlock.addAdjacentBlock(adjBlock); }
         }
       }
