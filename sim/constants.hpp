@@ -1,21 +1,24 @@
 #ifndef FLUID_CONSTANTS_HPP
 #define FLUID_CONSTANTS_HPP
 
-namespace Constants {
-  // Simulation scalar constants
-  extern double radiusMultiplier;
-  extern double fluidDensity;
-  extern double stiffnessPressure;
-  extern double stiffnessCollisions;
-  extern double damping;
-  extern double viscosity;
-  extern double particleSize;
-  extern double timeStep;
+#include <cmath>
+#include <vector>
 
-  // Simulation vector constants
-  extern std::vector<double> externalAcceleration;
-  extern std::vector<double> boxUpperBound;
-  extern std::vector<double> boxLowerBound;
+namespace Constants {
+// Simulation scalar constants
+extern const double radiusMultiplier;
+extern const double fluidDensity;
+extern const double stiffnessPressure;
+extern const double stiffnessCollisions;
+extern const double damping;
+extern const double viscosity;
+extern const double particleSize;
+extern const double timeStep;
+
+// Simulation vector constants
+extern const std::vector<double> externalAcceleration;
+extern const std::vector<double> boxUpperBound;
+extern const std::vector<double> boxLowerBound;
 } // namespace Constants
 
-#endif  // FLUID_CONSTANTS_HPP
+#endif // FLUID_CONSTANTS_HPP

@@ -1,12 +1,4 @@
 #include "parser.hpp"
-#include "simulation.hpp"
-#include "block.hpp"
-#include "constants.hpp"
-#include "grid.hpp"
-#include "particle.hpp"
-#include <fstream>
-#include <iostream>
-#include <locale>
 
 using namespace std;
 
@@ -43,26 +35,36 @@ int parser(char **argv) {
   std::string inputfile = argv[2];
   std::string outputfile = argv[3];
 
-  // print all arguments
-  std::cout << "Number of time steps: " << nts << std::endl;
-  std::cout << "inputfile: " << inputfile << std::endl;
-  std::cout << "outputfile: " << outputfile << std::endl;
-  std::cout << std::endl;
+  // Read input file
+  Grid grid = readInput(inputfile);
 
-  // Open files
+  // Print parameters and simulation
+  if (printParameters(grid) == 1) {
+    // simulation here
+    for (int i = 0; i < nts; i++) {
+      simulateOneStep(grid);
+    }
+  }
+
+  // Write output file
+  writeOutput(outputfile, grid);
+
+  return 0;
+}
+
+// read input file
+Grid readInput(std::string inputfile) {
   std::ifstream input_file(inputfile, std::ios::binary);
-  std::ofstream output_file(outputfile, std::ios::binary);
 
   // Read header vales
   auto ppm = read_binary_value<float>(input_file); // particles per meter
-  int np = read_binary_value<int>(input_file);      // number of particles
+  int np = read_binary_value<int>(input_file);
+
+  // Create and update Grid
+  Grid grid(ppm, np);
+  grid.update_grid();
 
   int count = -1; // count number of particles
-
-  // Create Grid
-  Grid grid(ppm, np);
-  // update grid
-  grid.update_grid();
 
   while (!input_file.eof()) {
     count += 1;
@@ -82,18 +84,22 @@ int parser(char **argv) {
     velocity.push_back(read_binary_value<float>(input_file));
 
     // Create particle
-    Particle p(position, hv, velocity);
+    Particle p(count, position, hv, velocity);
     grid.add_particle_to_block(p);
   }
+  input_file.close();
 
-  for (const auto& centerBlock : grid.get_blocks())
-  {
+  grid.set_count(count);
+  for (const auto &centerBlock : grid.get_blocks()) {
     grid.findAdjBlocks(centerBlock.second);
   }
 
-  if (count == np) {
+  return grid;
+}
 
-    // output details of file
+// print parameters
+int printParameters(Grid &grid) {
+  if (grid.get_count() == grid.get_np()) {
     std::cout << "Particles per meter: " << grid.get_ppm() << std::endl;
     std::cout << "np: " << grid.get_np() << std::endl;
     std::cout << "Smoothing length: " << grid.get_smoothingLength()
@@ -104,23 +110,29 @@ int parser(char **argv) {
     std::cout << "Number of blocks: " << grid.get_numBlocks() << std::endl;
     std::cout << "Block size: " << grid.get_sizeX() << " x " << grid.get_sizeY()
               << " x " << grid.get_sizeZ() << std::endl;
-
-    for (int i = 0; i < nts; i++)
-    {
-      simulateOneStep(grid);
-    }
+    return 1;
   } else {
-    std::cout << "Error: Number of particles mismatch. Header: " << np
-              << ", Found: " << count << std::endl;
+    std::cout << "Error: Number of particles mismatch. Header: "
+              << grid.get_np() << ", Found: " << grid.get_count() << std::endl;
+    return 0;
   }
+}
 
+void writeOutput(std::string outputfile, Grid &grid) {
+  std::ofstream output_file(outputfile, std::ios::binary);
 
-  // Now, need to write all the new particle information into the output files
-  write_binary_value(ppm, output_file);
-  write_binary_value(np, output_file);
+  // Sort all the particles
+  std::vector<Particle> particles;
+  for (auto block : grid.get_blocks()) {
+    std::vector<Particle> temp = block.second.getParticles();
+    particles.insert(particles.end(), temp.begin(), temp.end());
+  }
+  mergeSort(particles, 0, particles.size() - 1);
 
-  for (auto particle : grid.get_particles())
-  {
+  write_binary_value(grid.get_ppm(), output_file);
+  write_binary_value(grid.get_np(), output_file);
+
+  for (auto particle : particles) {
     float px = particle.get_px();
     float py = particle.get_py();
     float pz = particle.get_pz();
@@ -142,9 +154,72 @@ int parser(char **argv) {
     write_binary_value(az, output_file);
   }
 
-  // Close files
-  input_file.close();
-  output_file.close();
+  // Now, need to write all the new particle information into the output files
+  //   writeOutput(output_file, particles);
+  //
 
-  return 0;
+  output_file.close();
+}
+
+// Merge sort ascending order by particle.get_id()
+void merge(std::vector<Particle> &particles, int left, int middle, int right) {
+  int i, j, k;
+  int n1 = middle - left + 1;
+  int n2 = right - middle;
+
+  /* create temp arrays */
+  std::vector<Particle> L;
+  std::vector<Particle> R;
+
+  /* Copy data to temp arrays L[] and R[] */
+  for (i = 0; i < n1; i++)
+    L.emplace_back(particles[left + i]);
+  for (j = 0; j < n2; j++)
+    R.emplace_back(particles[middle + 1 + j]);
+
+  /* Merge the temp arrays back into arr[l..r]*/
+  i = 0;    // Initial index of first subarray
+  j = 0;    // Initial index of second subarray
+  k = left; // Initial index of merged subarray
+  while (i < n1 && j < n2) {
+    if (L[i].get_id() <= R[j].get_id()) {
+      particles[k] = L[i];
+      i++;
+    } else {
+      particles[k] = R[j];
+      j++;
+    }
+    k++;
+  }
+
+  /* Copy the remaining elements of L[], if there are any */
+  while (i < n1) {
+    particles[k] = L[i];
+    i++;
+    k++;
+  }
+
+  /* Copy the remaining elements of R[], if there are any */
+  while (j < n2) {
+    particles[k] = R[j];
+    j++;
+    k++;
+  }
+
+  L.clear();
+  R.clear();
+}
+
+void mergeSort(std::vector<Particle> &particles, int left, int right) {
+  if (left < right) {
+    // Same as (l+r)/2, but avoids overflow for
+    // large l and h
+    int middle = left + (right - left) / 2;
+
+    // Sort first and second halves
+    mergeSort(particles, left, middle);
+    mergeSort(particles, middle + 1, right);
+
+    merge(particles, left, middle, right);
+  }
 }

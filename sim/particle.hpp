@@ -1,12 +1,15 @@
 #ifndef FLUID_PARTICLE_HPP
 #define FLUID_PARTICLE_HPP
 
+#include "constants.hpp"
+#include <utility>
 #include <vector>
 
 // Particle class
 class Particle {
 private:
   // Member variables
+  int id;
   std::vector<float> position;
   std::vector<float> hv;
   std::vector<float> velocity;
@@ -16,11 +19,13 @@ private:
 
 public:
   // Constructor and Destructor
-  Particle(std::vector<float> position, std::vector<float> hv,
+  Particle(int id, std::vector<float> position, std::vector<float> hv,
            std::vector<float> velocity);
+
 
   ~Particle();
 
+  [[nodiscard]] int get_id() const;
   // Getters and setters for each variables
   std::vector<float> get_position();
   void set_position(std::vector<float> position);
@@ -33,7 +38,6 @@ public:
   [[nodiscard]] float get_hvx() const;
   [[nodiscard]] float get_hvy() const;
   [[nodiscard]] float get_hvz() const;
-
 
   std::vector<float> get_velocity();
   void set_velocity(std::vector<float> velocity);
