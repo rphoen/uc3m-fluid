@@ -35,26 +35,36 @@ int parser(char **argv) {
   std::string inputfile = argv[2];
   std::string outputfile = argv[3];
 
-  // print all arguments
-  std::cout << "Number of time steps: " << nts << std::endl;
-  std::cout << "inputfile: " << inputfile << std::endl;
-  std::cout << "outputfile: " << outputfile << std::endl;
-  std::cout << std::endl;
+  // Read input file
+  Grid grid = readInput(inputfile);
 
-  // Open files
+  // Print parameters and simulation
+  if (printParameters(grid) == 1) {
+    // simulation here
+    for (int i = 0; i < nts; i++) {
+      simulateOneStep(grid);
+    }
+  }
+
+  // Write output file
+  writeOutput(outputfile, grid);
+
+  return 0;
+}
+
+// read input file
+Grid readInput(std::string inputfile) {
   std::ifstream input_file(inputfile, std::ios::binary);
-  std::ofstream output_file(outputfile, std::ios::binary);
 
   // Read header vales
   auto ppm = read_binary_value<float>(input_file); // particles per meter
-  int np = read_binary_value<int>(input_file);     // number of particles
+  int np = read_binary_value<int>(input_file);
+
+  // Create and update Grid
+  Grid grid(ppm, np);
+  grid.update_grid();
 
   int count = -1; // count number of particles
-
-  // Create Grid
-  Grid grid(ppm, np);
-  // update grid
-  grid.update_grid();
 
   while (!input_file.eof()) {
     count += 1;
@@ -77,12 +87,19 @@ int parser(char **argv) {
     Particle p(count, position, hv, velocity);
     grid.add_particle_to_block(p);
   }
+  input_file.close();
 
+  grid.set_count(count);
   for (const auto &centerBlock : grid.get_blocks()) {
     grid.findAdjBlocks(centerBlock.second);
   }
 
-  if (count == np) {
+  return grid;
+}
+
+// print parameters
+int printParameters(Grid &grid) {
+  if (grid.get_count() == grid.get_np()) {
     std::cout << "Particles per meter: " << grid.get_ppm() << std::endl;
     std::cout << "np: " << grid.get_np() << std::endl;
     std::cout << "Smoothing length: " << grid.get_smoothingLength()
@@ -93,15 +110,16 @@ int parser(char **argv) {
     std::cout << "Number of blocks: " << grid.get_numBlocks() << std::endl;
     std::cout << "Block size: " << grid.get_sizeX() << " x " << grid.get_sizeY()
               << " x " << grid.get_sizeZ() << std::endl;
-
-    for (int i = 0; i < nts; i++) {
-      simulateOneStep(grid);
-    }
-
+    return 1;
   } else {
-    std::cout << "Error: Number of particles mismatch. Header: " << np
-              << ", Found: " << count << std::endl;
+    std::cout << "Error: Number of particles mismatch. Header: "
+              << grid.get_np() << ", Found: " << grid.get_count() << std::endl;
+    return 0;
   }
+}
+
+void writeOutput(std::string outputfile, Grid &grid) {
+  std::ofstream output_file(outputfile, std::ios::binary);
 
   // Sort all the particles
   std::vector<Particle> particles;
@@ -111,9 +129,8 @@ int parser(char **argv) {
   }
   mergeSort(particles, 0, particles.size() - 1);
 
-  // Now, need to write all the new particle information into the output files
-  write_binary_value(ppm, output_file);
-  write_binary_value(np, output_file);
+  write_binary_value(grid.get_ppm(), output_file);
+  write_binary_value(grid.get_np(), output_file);
 
   for (auto particle : particles) {
     float px = particle.get_px();
@@ -137,11 +154,11 @@ int parser(char **argv) {
     write_binary_value(az, output_file);
   }
 
-  // Close files
-  input_file.close();
-  output_file.close();
+  // Now, need to write all the new particle information into the output files
+  //   writeOutput(output_file, particles);
+  //
 
-  return 0;
+  output_file.close();
 }
 
 // Merge sort ascending order by particle.get_id()

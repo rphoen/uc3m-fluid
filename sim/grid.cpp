@@ -48,6 +48,8 @@ Grid::get_blocks() const {
 
 float Grid::get_ppm() const { return ppm; }
 int Grid::get_np() const { return np; }
+int Grid::get_count() const { return count; }
+void Grid::set_count(int count) { Grid::count = count; }
 
 double Grid::get_particleMass() const { return particleMass; }
 double Grid::get_smoothingLength() const { return smoothingLength; }

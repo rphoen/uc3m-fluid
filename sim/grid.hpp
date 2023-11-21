@@ -14,6 +14,7 @@ private:
   // them
   float ppm;
   int np;
+  int count; // number of particles counted
 
   // Number of blocks in each dimension
   double numberX;
@@ -54,6 +55,9 @@ public:
 
   [[nodiscard]] float get_ppm() const;
   [[nodiscard]] int get_np() const;
+
+  [[nodiscard]] int get_count() const;
+  void set_count(int count);
 
   [[nodiscard]] double get_particleMass() const;
   [[nodiscard]] double get_smoothingLength() const;
