@@ -2,21 +2,14 @@
 #include "constants.hpp"
 #include <cmath>
 #include <utility>
-#include <unordered_map>
 
 // Constructor
-Block::Block(std::vector<int> blockIndex, Grid* simGrid)
+Block::Block(std::vector<int> blockIndex)
 {
     index = std::move(blockIndex);
 
     //particles = ...; // ???
-
-    auto numX = simGrid->get_numberX();
-    auto numY = simGrid->get_numberY();
-    auto numZ = simGrid->get_numberZ();
-
     adjBlocks = {};
-    findAdjBlocks(numX, numY, numZ, simGrid);
 
 }
 
@@ -25,9 +18,19 @@ std::vector<Particle> Block::getParticles() {
   return particles;
 }
 
+// Return the block's index
+std::vector<int> Block::get_index() const {
+  return index;
+}
+
 // Add a particle to the vector of all particles belonging to a specific block
 void Block::addParticle(const Particle& part) {
   particles.emplace_back(part);
+}
+
+// Add an adjacent block to the block's adjacent block vector
+void Block::addAdjacentBlock(const Block& adjBlock) {
+  adjBlocks.emplace_back(adjBlock);
 }
 
 // Increasing density between a given particle and every particle in the adjacent blocks
@@ -226,32 +229,6 @@ void Block::boundaryCollisions(Particle part) {
 // <x-1, y, z>  <x-1, y+1, z>  <x-1, y-1, z>  <x-1, y+1, z+1>  <x-1, y+1, z-1>  <x-1, y-1, z+1>  <x-1, y-1, z-1>  <x-1, y, z+1>  <x-1, y, z-1>
 // <x, y, z>    <x,   y+1, z>  <x,   y-1, z>  <x,   y+1, z+1>  <x,   y+1, z-1>  <x,   y-1, z+1>  <x,   y-1, z-1>  <x,   y, z+1>  <x,   y, z-1>
 
-void Block::findAdjBlocks(auto numX, auto numY, auto numZ, Grid * simGrid) {
-  std::vector<int> centerBlock = index;
-  std::unordered_map<std::vector<int>, Block, hashing::vHash> blockDict = simGrid->get_blocks();
-  std::vector<Block> adjBlocksVec;
-
-  for (int i = -1; i <= 1; i++) {
-    for (int j = -1; j <= 1; j++) {
-        for (int k = -1; k <= 1; k++) {
-          int newX = centerBlock[0] + i;
-          int newY = centerBlock[1] + j;
-          int newZ = centerBlock[2] + k;
-
-          // Want to add a check here to see if the potential adjacent blocks actually exist within the grid
-          // If it does, we want to add it to the result
-          if (newX >= 0 && newX <= (numX - 1) && newY >= 0 && newY <= (numY - 1) && newZ >= 0 && newZ <= (numZ - 1)) {
-            std::vector<int> adjBlockIndex = {newX, newY, newZ};
-            Block adjBlock(adjBlockIndex, (Grid *) simGrid);
-            {
-              adjBlocksVec.emplace_back(adjBlock);
-            }
-          }
-        }
-    }
-  }
-  adjBlocks = adjBlocksVec;
-}
 
 // Block destructor implementation
 Block::~Block() = default;

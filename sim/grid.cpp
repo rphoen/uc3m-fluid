@@ -79,7 +79,7 @@ void Grid::add_particle_to_block(const Particle& particle) {
   }
   else
   {
-    Block newBlock(key, this);
+    Block newBlock(key);
     blocks.insert({key, newBlock});
   }
 //  if (get_blocks().count(key) > 0) {
@@ -153,4 +153,29 @@ std::vector<int> Grid::findBlock(Particle part) {
       }
     }
   return blockIndices;
+}
+
+void Grid::findAdjBlocks(Block centerBlock) const {
+  std::vector<int> centerIndex = centerBlock.get_index();
+  // std::unordered_map<std::vector<int>, Block, hashing::vHash> blockDict;
+
+  for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        for (int k = -1; k <= 1; k++) {
+          int newX = centerIndex[0] + i;
+          int newY = centerIndex[1] + j;
+          int newZ = centerIndex[2] + k;
+
+          // Want to add a check here to see if the potential adjacent blocks actually exist within the grid
+          // If it does, we want to add it to the result
+          if (newX >= 0 && newX <= (numberX - 1) && newY >= 0 && newY <= (numberY - 1) && newZ >= 0 && newZ <= (numberZ - 1)) {
+            std::vector<int> adjBlockIndex = {newX, newY, newZ};
+            Block adjBlock(adjBlockIndex);
+            {
+              centerBlock.addAdjacentBlock(adjBlock);
+            }
+          }
+        }
+      }
+  }
 }

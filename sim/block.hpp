@@ -10,16 +10,19 @@
   class Block {
   public:
     // Constructor
-    explicit Block(std::vector<int> index, Grid* simGrid);
+    explicit Block(std::vector<int> blockIndex);
 
     // Member particle getter
     std::vector<Particle> getParticles();
 
+    // Get the block's index
+    [[nodiscard]] std::vector<int> get_index() const;
+
     // Add particle to block
     void addParticle(const Particle& part);
 
-    // Finds adjacent blocks
-    void findAdjBlocks(auto numX, auto numY, auto numZ, Grid* simGrid);
+    // Add an adjacent block to the block's adjacent block vector
+    void addAdjacentBlock(const Block& adjBlock);
 
     // Increasing density...
     void incDensity(Particle& part, const Grid& grid);

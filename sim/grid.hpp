@@ -77,6 +77,9 @@ public:
   [[nodiscard]] double get_accTransConstant1() const;
   [[nodiscard]] double get_accTransConstant2() const;
 
+  // Finds adjacent blocks
+  void findAdjBlocks(Block centerBlock) const;
+
   // block functions
   void add_particle_to_block(const Particle& p);
 

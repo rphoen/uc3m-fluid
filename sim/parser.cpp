@@ -38,7 +38,7 @@ void write_binary_value(T value, std::ostream &os) {
   os.write(as_buffer(value), sizeof(value));
 }
 
-int parser(int argc, char **argv) {
+int parser(char **argv) {
   int nts = std::stoi(argv[1]); // number of time steps
   std::string inputfile = argv[2];
   std::string outputfile = argv[3];
@@ -84,6 +84,11 @@ int parser(int argc, char **argv) {
     // Create particle
     Particle p(position, hv, velocity);
     grid.add_particle_to_block(p);
+  }
+
+  for (const auto& centerBlock : grid.get_blocks())
+  {
+    grid.findAdjBlocks(centerBlock.second);
   }
 
   if (count == np) {
