@@ -1,153 +1,161 @@
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #include "../sim/block.hpp"
+#include "../sim/constants.hpp"
+#include "../sim/particle.hpp"
+#include "../sim/grid.hpp"
 
+// g++ -o utest/block_test utest/block_test.cpp sim/block.cpp -lgtest -lpthread
 
-TEST(ParticleTest, ParticleConstructor) {
-  // Initialize particle values
-  float px = 0.123;
-  float py = 0.456;
-  float pz = 0.789;
-  float hvx = 0.012;
-  float hvy = 0.034;
-  float hvz = 0.056;
-  float vx = 0.078;
-  float vy = 0.090;
-  float vz = 0.102;
+TEST(BlockTest, ConstructorWithValidBlockIndex) {
+  // Create a block with index [0, 0, 0]
+  std::vector<int> blockIndex(3, 0);
+  Block block(blockIndex);
 
-  // Create a particle using the constructor
-  Particle particle(px, py, pz, hvx, hvy, hvz, vx, vy, vz);
-
-  // Verify that the particle's position, half-velocity, and velocity vectors are set correctly
-  ASSERT_EQ(particle.position[0], px);
-  ASSERT_EQ(particle.position[1], py);
-  ASSERT_EQ(particle.position[2], pz);
-
-  ASSERT_EQ(particle.hv[0], hvx);
-  ASSERT_EQ(particle.hv[1], hvy);
-  ASSERT_EQ(particle.hv[2], hvz);
-
-  ASSERT_EQ(particle.velocity[0], vx);
-  ASSERT_EQ(particle.velocity[1], vy);
-  ASSERT_EQ(particle.velocity[2], vz);
-
-  // Verify that the particle's density and acceleration are initialized correctly
-  ASSERT_EQ(particle.density, 0.0);
-  ASSERT_EQ(particle.acceleration[0], Constants::externalAcceleration[0]);
-  ASSERT_EQ(particle.acceleration[1], Constants::externalAcceleration[1]);
-  ASSERT_EQ(particle.acceleration[2], Constants::externalAcceleration[2]);
+  // Check that the block's index is correct
+  ASSERT_EQ(block.get_index()[0], 0);
+  ASSERT_EQ(block.get_index()[1], 0);
+  ASSERT_EQ(block.get_index()[2], 0);
 }
 
-TEST(BoxTest, FindBlock) {
-  // Set up particle position
-  Particle particle = Particle(1, 0.01, 0.01, 0, 0, 0, 0, 0, 0);
+TEST(BlockTest, GetEmptyParticleVector) {
+  // Create a block with index [0, 0, 0]
+  std::vector<int> blockIndex(3, 0);
+  Block block(blockIndex);
 
-  // Update box parameters
-  Box::update_box_params();
-
-  // Find the block the particle belongs to
-  std::vector<int> block = Box::findBlock(particle);
-
-  // Verify that the block coordinates are correct
-  ASSERT_EQ(block[0], 1);
-  ASSERT_EQ(block[1], 1);
-  ASSERT_EQ(block[2], 1);
+  // Check that the block's particles vector is empty
+  ASSERT_EQ(block.getParticles().size(), 0);
 }
 
-TEST(FormulasTest, IncDensity) {
-  // Create two particles with different positions
-  Particle iPart = Particle(0.1, 0.2, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1);
-  Particle jPart = Particle(0.4, 0.5, 0.6, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1);
+TEST(BlockTest, AddParticle) {
+  // Create a block with index [0, 0, 0]
+  std::vector<int> blockIndex(3, 0);
+  Block block(blockIndex);
 
-  // Set the initial density of iPart to 0
-  //   iPart.density = 0.0;
+  // Create a particle and add it to the block
+  Particle particle(1, {1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0});
+  block.addParticle(particle);
 
-  // Call the incDensity() function to update the density of iPart
-  Formulas::incDensity(iPart, jPart);
-
-  // Verify that the density of iPart has increased
-  ASSERT_GT(iPart.density, 0.0);
+  // Check that the block's particles vector contains the added particle
+  ASSERT_EQ(block.getParticles().size(), 1);
+  ASSERT_EQ(block.getParticles()[0].get_id(), 1);
+  ASSERT_EQ(block.getParticles()[0].get_position(), (std::vector<float>{1.0, 2.0, 3.0}));
+  ASSERT_EQ(block.getParticles()[0].get_hv(), (std::vector<float>{4.0, 5.0, 6.0}));
+  ASSERT_EQ(block.getParticles()[0].get_velocity(), (std::vector<float>{7.0, 8.0, 9.0}));
 }
 
-TEST(FormulasTest, FindDistance) {
-  // Create two particles with different positions
-  Particle iPart = Particle(0.1, 0.2, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1);
-  Particle jPart = Particle(0.4, 0.5, 0.6, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1);;
+TEST(BlockTest, IncreaseDensity) {
+  // Create a block with index [0, 0, 0]
+  std::vector<int> blockIndex(3, 0);
+  Block block(blockIndex);
+  Grid grid(10.0, 1000);
 
-  // Calculate the distance between the two particles
-  double distance = Formulas::findDistance(iPart, jPart);
+  // Create a particle and add it to the block
+  Particle particle(4, {5.0, 6.0, 7.0}, {8.0, 9.0, 10.0}, {11.0, 12.0, 13.0});
+  block.addParticle(particle);
 
-  // Verify that the distance is positive
-  ASSERT_GT(distance, 0.0);
+  // Increase the density of the particle
+  block.incDensity(particle, grid.get_slSq(),
+                   grid.get_slSixth(),
+                   grid.get_densTransConstant());
+
+  // Check that the particle's density has increased
+  ASSERT_EQ(particle.get_density(), Constants::fluidDensity * 1.25);
 }
 
-TEST(FormulasTest, AccelerationTransfer) {
-  // Create two particles with different positions
-  Particle iPart = Particle(0.1, 0.2, 0.3, 0, 0, 0, 0, 0, 0.1);;
-  Particle jPart = Particle(0.1, 0.2, 0.29, 0, 0, 0.1, 0, 0, 0.1);;
+TEST(BlockTest, FindDistance) {
+  // Create a block with index [0, 0, 0]
+  std::vector<int> blockIndex(3, 0);
+  Block block(blockIndex);
 
-  // Set the initial acceleration of iPart and jPart to 0
-//   iPart.acceleration = 0.0;
-//   jPart.acceleration = 0.0;
+  // Create two particles and add them to the block
+  Particle particle1(7, {1.0, 2.0, 3.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+  Particle particle2(8, {1.01, 2.0, 3.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+  block.addParticle(particle1);
+  block.addParticle(particle2);
 
-  // Call the accelerationTransfer() function to update the acceleration of iPart and jPart
-  Formulas::accelerationTransfer(iPart, jPart);
+  // Find the distance between the particles
+  double distance = block.findDistance(particle1, particle2);
 
-  // Verify that the acceleration of iPart and jPart has changed
-  ASSERT_NE(iPart.acceleration[0], 0.0);
-  ASSERT_NE(jPart.acceleration[0], 0.0);
+  // Check that the distance is calculated correctly
+  ASSERT_EQ(distance, 0.01);
 }
 
-TEST(FormulasTest, ParticleMotion) {
-  // Create a particle with initial position, half-velocity, and velocity
-  Particle particle = Particle(0.1, 0.2, 0.3, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06);
+TEST(BlockTest, AccelerationTransfer) {
+  // Create a block with index [0, 0, 0]
+  std::vector<int> blockIndex(3, 0);
+  Block block(blockIndex);
+  Grid grid(10.0, 1000);
 
-    // Update the particle's position, half-velocity, and velocity using the particleMotion() function
-    Formulas::particleMotion(particle);
+  // Create two particles and add them to the block
+  Particle particle1(9, {1.0, 2.0, 3.0}, {0.01, 0, 0}, {0.02, 0, 0});
+  Particle particle2(10, {1.01, 2.0, 3.0}, {0, 0, 0}, {0, 0, 0});
+  block.addParticle(particle1);
+  block.addParticle(particle2);
 
-    // Verify that the particle's position, half-velocity, and velocity have changed
-    ASSERT_NE(particle.position[0], 0.1);
-    ASSERT_NE(particle.position[1], 0.2);
-    ASSERT_NE(particle.position[2], 0.3);
+  // Transfer acceleration between the particles
+  block.accelerationTransfer(particle1, grid.get_slSq(),
+                              grid.get_accTransConstant1(),
+                              grid.get_accTransConstant2());
 
-    ASSERT_NE(particle.hv[0], 0.01);
-    ASSERT_NE(particle.hv[1], 0.02);
-    ASSERT_NE(particle.hv[2], 0.03);
+  // Check that the particles' accelerations have been updated
+  ASSERT_EQ(particle1.get_ax(), -0.01625);
+  ASSERT_EQ(particle1.get_ay(), 0.01625);
+  ASSERT_EQ(particle1.get_az(), 0.0);
 
-    ASSERT_NE(particle.velocity[0], 0.04);
-    ASSERT_NE(particle.velocity[1], 0.05);
-    ASSERT_NE(particle.velocity[2], 0.06);
-
+  ASSERT_EQ(particle2.get_ax(), 0.01625);
+  ASSERT_EQ(particle2.get_ay(), -0.01625);
+  ASSERT_EQ(particle2.get_az(), 0.0);
 }
 
-TEST(FormulasTest, BoxCollisions) {
-    // Create a particle with a position inside the box
-    // Set the particle's half-velocity and velocity in the x-direction
-    Particle particle = Particle(0.2, 0.3, 0.4, 0.1, 0, 0, 0.2, 0, 0);
+TEST(BlockTest, UpdateParticleMotion) {
+  // Create a block with index [0, 0, 0]
+  std::vector<int> blockIndex(3, 0);
+  Block block(blockIndex);
 
-    // Call the boxCollisions() function to handle collisions with the box
-    Formulas::boxCollisions(particle);
+  // Create a particle and add it to the block
+  Particle particle(11, {1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0});
+  block.addParticle(particle);
 
-    // Verify that the particle's half-velocity and velocity in the x-direction have changed due to collisions
-    ASSERT_NE(particle.hv[0], 0.1);
-    ASSERT_NE(particle.velocity[0], 0.2);
+  // Update the particle's motion
+  block.particleMotion(particle);
+
+  // Check that the particle's position, velocity, and hv have been updated
+  ASSERT_EQ(particle.get_position(), (std::vector<float>{1.4, 2.4, 3.4}));
+  ASSERT_EQ(particle.get_velocity(), (std::vector<float>{4.2, 5.2, 6.2}));
+  ASSERT_EQ(particle.get_hv(), (std::vector<float>{7.2, 8.2, 9.2}));
 }
 
-TEST(FormulasTest, BoundaryCollisions) {
-    // Create a particle with a position close to a boundary
-    Particle particle = Particle(0.01, 0.2, 0.3, 0.1, 0, 0, 0.2, 0, 0);
-    particle.position[0] = 0.01;
-    particle.position[1] = 0.2;
-    particle.position[2] = 0.3;
+TEST(BlockTest, ProcessParticleBoxCollisions) {
+  // Create a block with index [0, 0, 0]
+  std::vector<int> blockIndex(3, 0);
+  Block block(blockIndex);
 
-    // Set the particle's half-velocity and velocity in the x-direction
-    particle.hv[0] = 0.1;
-    particle.velocity[0] = 0.2;
+  // Create a particle and add it to the block
+  Particle particle(12, {1.0, 0.0, 3.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+  block.addParticle(particle);
 
-    // Call the boundaryCollisions() function to handle collisions with the boundaries
-    Formulas::boundaryCollisions(particle);
+  // Process particle box collisions
+  block.boxCollisions(particle);
 
-    // Verify that the particle's position, half-velocity, and velocity in the x-direction have changed due to collisions
-    ASSERT_NE(particle.position[0], 0.01);
-    ASSERT_NE(particle.hv[0], 0.1);
-    ASSERT_NE(particle.velocity[0], 0.2);
+  // Check that the particle's position, velocity, and hv have been updated
+  ASSERT_EQ(particle.get_position(), (std::vector<float>{0.99, 0.0, 3.0}));
+  ASSERT_EQ(particle.get_velocity(), (std::vector<float>{-0.2, 0.0, 0.0}));
+  ASSERT_EQ(particle.get_hv(), (std::vector<float>{0.2, 0.0, 0.0}));
 }
+
+TEST(BlockTest, ProcessParticleBoundaryCollisions) {
+  // Create a block with index [0, 0, 0]
+  std::vector<int> blockIndex(3, 0);
+  Block block(blockIndex);
+
+  // Create a particle and add it to the block
+  Particle particle(13, {-1.0, 1.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+  block.addParticle(particle);
+
+  // Process particle boundary collisions
+  block.boundaryCollisions(particle);
+
+  // Check that the particle's position has been updated
+  ASSERT_EQ(particle.get_position(), (std::vector<float>{1.0, 1.0, 0.0}));
+}
+
