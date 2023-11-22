@@ -1,4 +1,5 @@
 #include "block.hpp"
+#include <cmath>
 
 // Constructor for the Block class
 Block::Block(std::vector<int> blockIndex)
@@ -68,58 +69,44 @@ double Block::findDistance(const Particle &iPart, const Particle &jPart) {
 
 // Transfer accelerations between a given particle and every particle in the
 // adjacent blocks NEED TO MAKE SHORTER
-void Block::accelerationTransfer(Particle part, double slSq,
-                                 double accTransConstant1,
-                                 double accTransConstant2) {
+void Block::accelerationTransfer(Particle part, double slSq, double accTransConstant1, double accTransConstant2) {
   auto pos = part.get_position();
   for (auto &block : adjBlocks) {
     auto adjParts = block.getParticles();
     for (auto &adjPart : adjParts) {
       auto pos2 = adjPart.get_position(); // check if dist is short enough first
-      auto xDiffSq = pow((pos[0] - pos2[0]), 2);
-      auto yDiffSq = pow((pos[1] - pos2[1]), 2);
-      auto zDiffSq = pow((pos[2] - pos2[2]), 2);
-      auto diffSum = xDiffSq + yDiffSq + zDiffSq;
-
+      auto diffSum = pow(pos[0] - pos2[0], 2) + pow(pos[1] - pos2[1], 2) +
+                     pow(pos[2] - pos2[2], 2);
       if (diffSum < slSq) {
         double const distance = findDistance(part, adjPart);
-        // Change this to helper function eventually
-        auto xAccChange = (((pos[0] - pos2[0]) * accTransConstant1 *
-                            ((pow((slSq - distance), 2)) / distance) *
-                            (part.get_density() + adjPart.get_density() -
-                             (2 * Constants::fluidDensity)) *
-                            accTransConstant2) /
-                           (part.get_density() * adjPart.get_density()));
-
-        auto yAccChange = (((pos[1] - pos2[1]) * accTransConstant1 *
-                            ((pow((slSq - distance), 2)) / distance) *
-                            (part.get_density() + adjPart.get_density() -
-                             (2 * Constants::fluidDensity)) *
-                            accTransConstant2) /
-                           (part.get_density() * adjPart.get_density()));
-
-        auto zAccChange = (((pos[2] - pos2[2]) * accTransConstant1 *
-                            ((pow((slSq - distance), 2)) / distance) *
-                            (part.get_density() + adjPart.get_density() -
-                             (2 * Constants::fluidDensity)) *
-                            accTransConstant2) /
-                           (part.get_density() * adjPart.get_density()));
-
+        double const commonMult = accTransConstant1 * ((pow((slSq - distance), 2)) / distance) * (part.get_density() + adjPart.get_density() - 
+          (2 * Constants::fluidDensity)) * accTransConstant2 / (part.get_density() * adjPart.get_density());
+        std::vector<double> const accChanges = {(pos[0] - pos2[0]) * commonMult, (pos[1] - pos2[1]) * commonMult, (pos[2] - pos2[2]) * commonMult};
         if (!part.hasAccelerated()) {
-          std::vector<double> const partNew = {(part.get_ax() + xAccChange),
-                                               (part.get_ay() + yAccChange),
-                                               (part.get_az() + zAccChange)};
-          std::vector<double> const adjNew = {(adjPart.get_ax() - xAccChange),
-                                              (adjPart.get_ay() - yAccChange),
-                                              (adjPart.get_az() - zAccChange)};
-          part.set_acceleration(partNew);
+          part.set_acceleration(
+              addVectors(part.get_acceleration(), accChanges));
+          adjPart.set_acceleration(
+              subtractVectors(part.get_acceleration(), accChanges));
           part.updateAccBool();
-          adjPart.set_acceleration(adjNew);
           adjPart.updateAccBool();
         }
       }
     }
   }
+}
+
+std::vector<double> Block::addVectors(std::vector<double> vec1,
+                               std::vector<double> vec2) {
+  std::vector<double> newVec = {vec1[0] + vec2[0], vec1[1] + vec2[1],
+                                vec1[2] + vec2[2]};
+  return newVec;
+}
+
+std::vector<double> Block::subtractVectors(std::vector<double> vec1,
+                                    std::vector<double> vec2) {
+  std::vector<double> newVec = {vec1[0] - vec2[0], vec1[1] - vec2[1],
+                                vec1[2] - vec2[2]};
+  return newVec;
 }
 
 // Update a particle (i.e., its position, hv, and velocity
