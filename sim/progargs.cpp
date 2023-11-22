@@ -16,7 +16,7 @@ int progargs(int argc, std::array<char *, 4> argv) {
     return -2;
   }
   auto checkFile = [](const char *filename, const char *mode, int errorCode) {
-    std::ifstream file(filename);
+    std::ifstream const file(filename);
     if (!file.is_open()) {
       std::cerr << "Error: Cannot open " << filename << " for " << mode << "\n";
       return errorCode;

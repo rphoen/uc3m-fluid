@@ -14,13 +14,22 @@ public:
   explicit Block(std::vector<int> index);
   ~Block();
 
-  // Delete the copy constructor and copy assignment operator
-  Block(const Block &) = default;
-  Block &operator=(const Block &) = delete;
+//  // Delete the copy constructor and copy assignment operator
+//  Block(const Block &) = default;
+//  Block &operator=(const Block &) = delete;
+//
+//  // Delete the move constructor and move assignment operator
+//  Block(Block &&) = delete;
+//  Block &operator=(Block &&) = delete;
 
-  // Delete the move constructor and move assignment operator
-  Block(Block &&) = delete;
-  Block &operator=(Block &&) = delete;
+  // Copy constructors, move constructors
+  Block(const Block& other) = default;
+
+  Block& operator=(const Block& other) = default;
+
+  Block(Block&& other) = default;
+
+  Block& operator=(Block&& other) = default;
 
   // Member particle getter
   std::vector<Particle> getParticles();
@@ -46,9 +55,9 @@ public:
                             double accTransConstant1, double accTransConstant2);
 
   // helper function for accelerationTransfer
-  std::vector<double> addVectors(std::vector<double> vec1,
+  static std::vector<double> addVectors(std::vector<double> vec1,
                                  std::vector<double> vec2);
-  std::vector<double> subtractVectors(std::vector<double> vec1,
+  static std::vector<double> subtractVectors(std::vector<double> vec1,
                                       std::vector<double> vec2);
 
   // Particle motion

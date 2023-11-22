@@ -4,9 +4,7 @@
 Particle::Particle(int particleID, std::vector<float> partPosition,
                    std::vector<float> partHv, std::vector<float> partVelocity)
     : id(particleID), position(std::move(partPosition)),
-      acceleration(Constants::getExternalAcceleration()), density(0.0),
-      accelerated(false), velocity(std::move(partVelocity)),
-      hv(std::move(partHv)) {}
+     hv(std::move(partHv)), velocity(std::move(partVelocity)), density(0.0), acceleration(Constants::getExternalAcceleration()), accelerated(false) {}
 
 // Destructor
 Particle::~Particle() = default;
