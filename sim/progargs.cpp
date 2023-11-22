@@ -1,43 +1,28 @@
-#include <fstream>
-#include <iostream>
+#include "progargs.hpp"
 
-int progargs(int argc, char **argv) {
-
+int progargs(int argc, std::array<char *, 4> argv) {
   if (argc != 4) {
-    std::cerr << "Error: Invalid number of arguments: " << argc - 1 << "."
-              << std::endl;
+    std::cerr << "Error: Invalid number of arguments: " << argc - 1 << ".\n";
     return -1;
-  } else {
-    // check if nts is integer, if not error code -1
-    if (atoi(argv[1]) == 0) {
-      std::cout << "Error: Time steps must be numeric." << std::endl;
-      return -1;
-    }
-    // check if nts is negative
-    if (atoi(argv[1]) <= 0) {
-      std::cout << "Error: Invalid number of time steps." << std::endl;
-      return -2;
-    }
-
-    // check if input file can be opened for reading
-    std::ifstream infile(argv[2]);
-    if (infile.is_open()) {
-      infile.close();
-    } else {
-      std::cerr << "Error: Cannot open " << argv[2] << " for reading"
-                << std::endl;
-      return -3;
-    }
-
-    // check if input file can be opened for reading
-    std::ifstream outfile(argv[3]);
-    if (outfile.is_open()) {
-      outfile.close();
-    } else {
-      std::cerr << "Error: Cannot open " << argv[3] << " for writing\n";
-      return -4;
-    }
-
-    return 0;
   }
+  if (std::stoi(argv[1]) == 0) {
+    std::cout << "Error: Time steps must be numeric."
+              << "\n";
+    return -1;
+  }
+  if (std::stoi(argv[1]) <= 0) {
+    std::cout << "Error: Invalid number of time steps."
+              << "\n";
+    return -2;
+  }
+  auto checkFile = [](const char *filename, const char *mode, int errorCode) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+      std::cerr << "Error: Cannot open " << filename << " for " << mode << "\n";
+      return errorCode;
+    }
+    return 0;
+  };
+
+  return checkFile(argv[2], "reading", -3) + checkFile(argv[3], "writing", -4);
 }

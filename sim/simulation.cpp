@@ -1,27 +1,32 @@
 // Need to create a function that will do the simulation for ONE iteration...
-#include "block.hpp"
-#include "formulas.hpp"
+#include "simulation.hpp"
 
 // What arguments?
-  // One particle, and then we can check its block info for adjacent particles?
-void simulateOneStep(Particle part) // Why by reference?
-{
-      for (auto adjBlock : part.adjBlocks) {
-        for (auto adjParticle : adjBlock.particles) {
-          part.updateBlock(part.position[0], part.position[1], part.position[2]); // Probably should write an update_block field in particle class
-          adjParticle = findBlock(adjParticle);
+// One particle, and then we can check its block info for adjacent particles?
+void simulateOneStep(const Grid &simGrid) {
+  // get blocks in a dictionary from simGrid
+  auto blocksDict = simGrid.get_blocks();
 
-          // Make these member functions of block
-          Formulas::accelerationTransfer(part, adjParticle);
-          Formulas::incDensity(part, adjParticle);
+  for (const auto &blockPair : blocksDict) {
+    Block blockObj = blockPair.second;
+    for (auto particle : blockObj.getParticles()) {
+      // Run each member function of a block on the particle in question
+      blockObj.accelerationTransfer(particle, simGrid.get_slSq(),
+                                    simGrid.get_accTransConstant1(),
+                                    simGrid.get_accTransConstant2());
+      blockObj.incDensity(particle, simGrid.get_slSq(), simGrid.get_slSixth(),
+                          simGrid.get_densTransConstant());
+      // TODO: check if works, if not change pack to blockObj
+      Block::boxCollisions(particle);
+      Block::particleMotion(particle);
+      Block::boundaryCollisions(particle);
+    }
+  }
+}
 
-          Formulas::boxCollisions(part);
-          Formulas::particleMotion(part);
-          Formulas::boundaryCollisions(part);
-
-
-          part.updateBlock(part.position[0], part.position[1], part.position[2]);
-          adjParticle.updateBlock(adjParticle.position[0], adjParticle.position[1], adjParticle.position[2]);
-        }
-      }
-};
+// Do I need to verify particle blocks?
+//
+//         part.updateBlock(part.position[0], part.position[1],
+//         part.position[2]); // Probably should write an update_block field in
+//         particle class
+//            adjParticle = findBlock(adjParticle);

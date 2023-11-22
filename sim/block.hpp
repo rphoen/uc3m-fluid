@@ -1,50 +1,63 @@
 #ifndef BLOCK_CPP
 #define BLOCK_CPP
 
+#include "constants.hpp"
 #include "particle.hpp"
 #include <cmath>
+#include <utility>
 #include <vector>
 
-  // Block class
-  class Block {
-  public:
-    // Constructor
-    Block(std::vector<int> index);
+// Block class
+class Block {
+public:
+  // Constructor and Destructor
+  explicit Block(std::vector<int> index);
+  ~Block();
 
-    // Member particle getter
-    std::vector<Particle> getParticles();
+  // Delete the copy constructor and copy assignment operator
+  Block(const Block &) = default;
+  Block &operator=(const Block &) = delete;
 
-    // Add particle to block
-    void addParticle(const Particle& part);
+  // Delete the move constructor and move assignment operator
+  Block(Block &&) = delete;
+  Block &operator=(Block &&) = delete;
 
-    // Get index
-    std::vector<int> getIndex();
+  // Member particle getter
+  std::vector<Particle> getParticles();
 
-    // Increasing density...
-    void incDensity(const Particle& part, Grid grid);
+  // Get the block's index
+  [[nodiscard]] std::vector<int> get_index() const;
 
-    // Distance formula ..
-    double findDistance(Particle iPart, Particle jPart);
+  // Add particle to block
+  void addParticle(const Particle &part);
 
-    // Transferring accelerations
-    void accelerationTransfer();
+  // Add an adjacent block to the block's adjacent block vector
+  void addAdjacentBlock(const Block &adjBlock);
 
-    // Particle motion
-    void particleMotion();
+  // Increasing density...
+  void incDensity(Particle &part, double slSq, double slSixth,
+                  double densTransConstant);
 
-    // Process box collisions
-    void boxCollisions();
+  // Distance formula ..
+  static double findDistance(const Particle &iPart, const Particle &jPart);
 
-    // Process boundary collisions
-    void boundaryCollisions();
+  // Transferring accelerations
+  void accelerationTransfer(Particle part, double slSq,
+                            double accTransConstant1, double accTransConstant2);
 
-    // Destructor
-    ~Block();
+  // Particle motion
+  static void particleMotion(Particle part);
 
-  private:
-    std::vector<Particle> particles;
-    std::vector<Block> adjBlocks;
-    std::vector<int> index;
+  // Process box collisions
+  static void boxCollisions(Particle part);
+
+  // Process boundary collisions
+  static void boundaryCollisions(Particle part);
+
+private:
+  std::vector<Particle> particles;
+  std::vector<Block> adjBlocks;
+  std::vector<int> index;
 };
 
 #endif

@@ -1,227 +1,213 @@
-#include "grid.hpp"
 #include "block.hpp"
-#include "particle.hpp"
-#include <cmath>
-#include <utility>
 
-// Constructor
+// Constructor for the Block class
 Block::Block(std::vector<int> blockIndex)
-{
-    index = std::move(blockIndex);
-};
+    : particles({}), adjBlocks({}), index(std::move(blockIndex)) {}
 
-std::vector<Particle> Block::getParticles() {
-  return particles;
-};
+// Return a vector of all particles that belong to a specific block
+std::vector<Particle> Block::getParticles() { return particles; }
 
-void Block::addParticle(const Particle& part) {
-  particles.emplace_back(part);
-};
+// Return the block's index
+std::vector<int> Block::get_index() const { return index; }
 
-// Get index
-std::vector<int> Block::getIndex() {
-  return index;
+// Add a particle to the vector of all particles belonging to a specific block
+void Block::addParticle(const Particle &part) { particles.emplace_back(part); }
+
+// Add an adjacent block to the block's adjacent block vector
+void Block::addAdjacentBlock(const Block &adjBlock) {
+  adjBlocks.emplace_back(adjBlock);
 }
 
-// Increasing density...
-void Block::incDensity(const Particle& part, Grid grid) {
-  auto px = part.get_px();
-  auto py = part.get_py();
-  auto pz = part.get_pz();
-
-  for (auto& bk : adjBlocks)
-    {
-      auto adjparts = bk.getParticles();
-     for (const auto& adjpart : adjparts)
-       {
-        auto px2 = adjpart.get_px();
-        auto py2 = adjpart.get_py();
-        auto pz2 = adjpart.get_pz();
-        auto xDiffSq = pow((px - px2), 2);
-        auto yDiffSq = pow((py - py2), 2);
-        auto zDiffSq = pow((pz - pz2), 2);
-        auto diffSum = xDiffSq + yDiffSq + zDiffSq;  
-        auto slSq = grid.get_slSq();
-         
-        if (diffSum < slSq)
-        {
-          double densityChange = pow((slSq - diffSum), 3);
-          double newDensity = part.get_density();
-          double densTransformation = (newDensity + grid.get_slSixth()) * grid.get_densTransConstant();
-          part.set_density(densTransformation);
-        }
-         
-        // else if (vecNorm >= Constants::slSq) {
-        //   iPart.density += 0;}
-      }
-  }
-};
-
-// Formula to calculate the distance between two particles
-double Block::findDistance(Particle iPart, Particle jPart) {
-  float ix = iPart.get_px();
-  float iy = iPart.get_py();
-  float iz = iPart.get_pz();
-  float jx = jPart.get_px();
-  float jy = jPart.get_py();
-  float jz = jPart.get_pz();
-
-  auto xDiffSq = pow((px - px2), 2);
-  auto yDiffSq = pow((py - py2), 2);
-  auto zDiffSq = pow((pz - pz2), 2);
-  auto diffSum = xDiffSq + yDiffSq + zDiffSq;  
-
-  double distance = sqrt(fmax(vecNorm, pow(10, -12)));
-  return distance;
-};
-
-// Need to make sure acceleration transfers aren't double counted...
-void accelerationTransfer(Particle part) {
-  // double distance = findDistance(iPart, jPart);
+// Increasing density between a given particle and every particle in the
+// adjacent blocks
+void Block::incDensity(Particle &part, double slSq, double slSixth,
+                       double densTransConstant) {
   auto px1 = part.get_px();
   auto py1 = part.get_py();
   auto pz1 = part.get_pz();
 
-  for (const auto& block : adjBlocks) {
+  for (auto &blk : adjBlocks) {
+    auto adjParts = blk.getParticles();
+    for (const auto &adjPart : adjParts) {
+      auto px2 = adjPart.get_px();
+      auto py2 = adjPart.get_py();
+      auto pz2 = adjPart.get_pz();
+      auto xDiffSq = pow((px1 - px2), 2);
+      auto yDiffSq = pow((py1 - py2), 2);
+      auto zDiffSq = pow((pz1 - pz2), 2);
+      auto diffSum = xDiffSq + yDiffSq + zDiffSq;
+
+      if (diffSum < slSq) {
+        double const densityChange = pow((slSq - diffSum), 3);
+        double const newDensity = part.get_density() + densityChange;
+        double const densTransformation =
+            (newDensity + slSixth) * densTransConstant;
+        part.set_density(densTransformation);
+      }
+    }
+  }
+}
+
+// Formula to calculate the distance between two given particles
+double Block::findDistance(const Particle &iPart, const Particle &jPart) {
+  float const ipx = iPart.get_px();
+  float const ipy = iPart.get_py();
+  float const ipz = iPart.get_pz();
+  float const jpx = jPart.get_px();
+  float const jpy = jPart.get_py();
+  float const jpz = jPart.get_pz();
+
+  auto xDiffSq = pow((ipx - jpx), 2);
+  auto yDiffSq = pow((ipy - jpy), 2);
+  auto zDiffSq = pow((ipz - jpz), 2);
+  auto diffSum = xDiffSq + yDiffSq + zDiffSq;
+
+  double const distance = sqrt(fmax(diffSum, pow(10, -12)));
+  return distance;
+}
+
+// Transfer accelerations between a given particle and every particle in the
+// adjacent blocks NEED TO MAKE SHORTER
+void Block::accelerationTransfer(Particle part, double slSq,
+                                 double accTransConstant1,
+                                 double accTransConstant2) {
+  auto px1 = part.get_px();
+  auto py1 = part.get_py();
+  auto pz1 = part.get_pz();
+
+  for (auto &block : adjBlocks) {
     auto adjParts = block.getParticles();
-    for(const auto& adjPart : adjParts) {
+    for (auto &adjPart : adjParts) {
       auto px2 = adjPart.get_px();
       auto py2 = adjPart.get_py();
       auto pz2 = adjPart.get_pz();
 
-      // TODO: Need to check if distance is short enough first
-      double distance = findDistance(px1, py1, pz1, px2, py2, pz2);
+      // Need to check if distance is short enough first
+      auto xDiffSq = pow((px1 - px2), 2);
+      auto yDiffSq = pow((py1 - py2), 2);
+      auto zDiffSq = pow((pz1 - pz2), 2);
+      auto diffSum = xDiffSq + yDiffSq + zDiffSq;
 
-      auto accChange = ((((px1 - px2) * grid.get_accTransConstant1() * (pow((grid.smoothingLength - distance), 2)) / distance) * (part.get_density() + adjPart.get_density() - (2 * Constants::fluidDensity)) * grid.get_accTransConstant2()) / (part.get_density() * adjPart.get_density()));
+      if (diffSum < slSq) // Update the acceleration
+      {
+        double const distance = findDistance(part, adjPart);
+        // Change this to helper function eventually
+        auto xAccChange = (((px1 - px2) * accTransConstant1 *
+                            ((pow((slSq - distance), 2)) / distance) *
+                            (part.get_density() + adjPart.get_density() -
+                             (2 * Constants::fluidDensity)) *
+                            accTransConstant2) /
+                           (part.get_density() * adjPart.get_density()));
 
-      // TODO: This is wrong. Need to update the accelerations.
-      part.set_acceleration(accChange);
-      adjPart.set_acceleration(accChange);
-      
+        auto yAccChange = (((py1 - py2) * accTransConstant1 *
+                            ((pow((slSq - distance), 2)) / distance) *
+                            (part.get_density() + adjPart.get_density() -
+                             (2 * Constants::fluidDensity)) *
+                            accTransConstant2) /
+                           (part.get_density() * adjPart.get_density()));
+
+        auto zAccChange = (((pz1 - pz2) * accTransConstant1 *
+                            ((pow((slSq - distance), 2)) / distance) *
+                            (part.get_density() + adjPart.get_density() -
+                             (2 * Constants::fluidDensity)) *
+                            accTransConstant2) /
+                           (part.get_density() * adjPart.get_density()));
+
+        if (!part.hasAccelerated()) {
+          std::vector<double> const partNew = {(part.get_ax() + xAccChange),
+                                               (part.get_ay() + yAccChange),
+                                               (part.get_az() + zAccChange)};
+          std::vector<double> const adjNew = {(adjPart.get_ax() - xAccChange),
+                                              (adjPart.get_ay() - yAccChange),
+                                              (adjPart.get_az() - zAccChange)};
+          part.set_acceleration(partNew);
+          part.updateAccBool();
+          adjPart.set_acceleration(adjNew);
+          adjPart.updateAccBool();
+        }
+      }
     }
   }
+}
+
+// Update a particle (i.e., its position, hv, and velocity
+void Block::particleMotion(Particle part) {
+  std::vector<float> position = part.get_position();
+  std::vector<float> vectorhv = part.get_hv();
+  std::vector<float> velocity = part.get_velocity();
+  std::vector<double> acceleration = part.get_acceleration();
+
   for (int i = 0; i < 3; i++) {
-    double accChange =
-        // Either too little precision, or a computational error
-        // Rewrite the code
-        ((((iPart.position[i] - jPart.position[i]) *
-           Constants::accTransConstant1 *
-           (pow((Constants::smoothingLength - distance), 2)) / distance) *
-          (iPart.density + jPart.density - (2 * Constants::fluidDensity)) *
-          Constants::accTransConstant2) /
-         (iPart.density * jPart.density));
-
-    // Extra variable inside particles, a boolean for example
-      // to keep track of whether or not a particle has been updated
-    iPart.acceleration[i] += accChange;
-    jPart.acceleration[i] -= accChange;
+    position[i] =
+        static_cast<float>(position[i] + vectorhv[i] * Constants::timeStep +
+                           acceleration[i] * pow(Constants::timeStep, 2));
+    velocity[i] = static_cast<float>(
+        vectorhv[i] + ((acceleration[i] * Constants::timeStep) / 2));
+    vectorhv[i] =
+        static_cast<float>(vectorhv[i] + acceleration[i] * Constants::timeStep);
   }
-};
 
-void particleMotion() {
+  part.set_position(position);
+  part.set_velocity(velocity);
+  part.set_hv(vectorhv);
+}
+
+const int ten = 10;
+const int minus_ten = -10;
+// Process the box collisions of one particle
+void Block::boxCollisions(Particle part) {
+  std::vector<float> position = part.get_position();
+  std::vector<float> vectorhv = part.get_hv();
+  std::vector<float> velocity = part.get_velocity();
+  std::vector<double> currentAcc = part.get_acceleration();
+  std::vector<double> newAcc = part.get_acceleration();
   for (int i = 0; i < 3; i++) {
-    iPart.position[i] =
-        iPart.position[i] + iPart.hv[i] * Constants::timeStep + iPart.acceleration[i] * pow(Constants::timeStep, 2);
-    iPart.velocity[i] = iPart.hv[i] + ((iPart.acceleration[i] * Constants::timeStep) / 2);
-    iPart.hv[i] = iPart.hv[i] + iPart.acceleration[i] * Constants::timeStep;
+    auto newCoord =
+        static_cast<float>(position[i] + vectorhv[i] * Constants::timeStep);
+    double const changeLower =
+        Constants::particleSize - (newCoord - Constants::getBoxLowerBound()[i]);
+    double const changeUpper =
+        Constants::particleSize - (Constants::getBoxUpperBound()[i] - newCoord);
+    auto check = pow(ten, minus_ten);
+
+    if (changeLower > check) {
+      newAcc[i] = currentAcc[i] + Constants::stiffnessCollisions * changeLower -
+                  Constants::damping * velocity[i];
+
+    } else if (changeUpper > check) {
+      newAcc[i] = currentAcc[i] - Constants::stiffnessCollisions * changeLower -
+                  Constants::damping * velocity[i];
+    }
   }
-};
+  part.set_acceleration(newAcc);
+}
 
-void boxCollisions(Particle iPart) {
-  // Checking x-boundary collisions...
-  float newX = iPart.position[0] + iPart.hv[0] * Constants::timeStep;
+// Process the boundary collisions of one particle
+void Block::boundaryCollisions(Particle part) {
+  std::vector<float> position = part.get_position();
+  std::vector<float> velocity = part.get_velocity();
+  std::vector<float> vectorhv = part.get_hv();
 
-  // Check for both bounds...
-  double changeXLower =
-      Constants::particleSize - (newX - Constants::boxLowerBound[0]);
-  double changeXUpper =
-      Constants::particleSize - (newX - Constants::boxUpperBound[0]);
+  for (int i = 0; i < 3; i++) {
+    auto dLower = position[i] - Constants::getBoxLowerBound()[i];
+    auto dUpper = Constants::getBoxUpperBound()[i] - position[i];
 
-  if (changeXLower > pow(10, -10)) {
-    iPart.acceleration[0] += Constants::stiffnessCollisions * changeXLower -
-                             Constants::damping * iPart.velocity[0];
-  } else if (changeXUpper > pow(10, -10)) {
-    iPart.acceleration[0] -= Constants::stiffnessCollisions * changeXLower +
-                             Constants::damping * iPart.velocity[0];
-  };
-  // Checking y-boundary collisions...
-  float newY = iPart.position[1] + iPart.hv[1] * Constants::timeStep;
-
-  // Check for both bounds...
-  double changeYLower =
-      Constants::particleSize - (newY - Constants::boxLowerBound[1]);
-  double changeYUpper =
-      Constants::particleSize - (newY - Constants::boxUpperBound[1]);
-
-  if (changeYLower > pow(10, -10)) {
-    iPart.acceleration[1] += Constants::stiffnessCollisions * changeYLower -
-                             Constants::damping * iPart.velocity[1];
-  } else if (changeYUpper > pow(10, -10)) {
-    iPart.acceleration[1] -= Constants::stiffnessCollisions * changeYLower +
-                             Constants::damping * iPart.velocity[1];
-  };
-
-  // Checking z-boundary collisions...
-  float newZ = iPart.position[2] + iPart.hv[2] * Constants::timeStep;
-
-  // Check for both bounds...
-  double changeZLower =
-      Constants::particleSize - (newZ - Constants::boxLowerBound[2]);
-  double changeZUpper =
-      Constants::particleSize - (newZ - Constants::boxUpperBound[2]);
-
-  if (changeZLower > pow(10, -10)) {
-    iPart.acceleration[2] += Constants::stiffnessCollisions * changeZLower -
-                             Constants::damping * iPart.velocity[2];
-  } else if (changeZUpper > pow(10, -10)) {
-    iPart.acceleration[2] -= Constants::stiffnessCollisions * changeZLower +
-                             Constants::damping * iPart.velocity[2];
-  };
-};
-
-void boundaryCollisions(Particle iPart) {
-  // X-boundary...
-  float dXLower = iPart.position[0] - Constants::boxLowerBound[0];
-  float dXUpper = Constants::boxUpperBound[0] - iPart.position[0];
-
-  if (dXLower < 0) {
-    iPart.position[0] = Constants::boxLowerBound[0] - dXLower;
-    iPart.velocity[0] = -1 * iPart.velocity[0];
-    iPart.hv[0] = -1 * iPart.hv[0];
-  } else if (dXUpper < 0) {
-    iPart.position[0] = Constants::boxUpperBound[0] + dXUpper;
-    iPart.velocity[0] = -1 * iPart.velocity[0];
-    iPart.hv[0] = -1 * iPart.hv[0];
+    if (dLower < 0) {
+      position[i] =
+          static_cast<float>(Constants::getBoxLowerBound()[i] - dLower);
+      velocity[i] = -1 * velocity[i];
+      vectorhv[i] = -1 * vectorhv[i];
+    } else if (dUpper < 0) {
+      position[i] =
+          static_cast<float>(Constants::getBoxUpperBound()[i] + dUpper);
+      velocity[i] = -1 * velocity[i];
+      vectorhv[i] = -1 * vectorhv[i];
+    }
   }
-
-  // Y-boundary...
-  float dYLower = iPart.position[1] - Constants::boxLowerBound[1];
-  float dYUpper = Constants::boxUpperBound[1] - iPart.position[1];
-
-  if (dYLower < 0) {
-    iPart.position[1] = Constants::boxLowerBound[1] - dYLower;
-    iPart.velocity[1] = -1 * iPart.velocity[1];
-    iPart.hv[1] = -1 * iPart.hv[1];
-  } else if (dYUpper < 0) {
-    iPart.position[1] = Constants::boxUpperBound[1] + dYUpper;
-    iPart.velocity[1] = -1 * iPart.velocity[1];
-    iPart.hv[1] = -1 * iPart.hv[1];
-  }
-
-  // Z-boundary...
-  float dZLower = iPart.position[2] - Constants::boxLowerBound[2];
-  float dZUpper = Constants::boxUpperBound[2] - iPart.position[2];
-
-  if (dZLower < 0) {
-    iPart.position[2] = Constants::boxLowerBound[2] - dZLower;
-    iPart.velocity[2] = -1 * iPart.velocity[2];
-    iPart.hv[2] = -1 * iPart.hv[2];
-  } else if (dZUpper < 0) {
-    iPart.position[2] = Constants::boxUpperBound[2] + dZUpper;
-    iPart.velocity[2] = -1 * iPart.velocity[2];
-    iPart.hv[2] = -1 * iPart.hv[2];
-  }
-};
+  part.set_position(position);
+  part.set_velocity(velocity);
+  part.set_hv(vectorhv);
+}
 
 // Block destructor implementation
 Block::~Block() = default;
