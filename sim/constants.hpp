@@ -16,6 +16,8 @@ extern const double particleSize;
 extern const double timeStep;
 
 // Simulation vector constants
+std::vector<std::vector<double>> initializeStatics();
+
 extern const std::vector<double> externalAcceleration;
 extern const std::vector<double> boxUpperBound;
 extern const std::vector<double> boxLowerBound;
