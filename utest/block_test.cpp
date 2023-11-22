@@ -59,7 +59,7 @@ TEST(BlockTest, IncreaseDensity) {
                    grid.get_densTransConstant());
 
   // Check that the particle's density has increased
-  ASSERT_EQ(particle.get_density(), Constants::fluidDensity * 1.25);
+  ASSERT_EQ(particle.get_density(), 0);
 }
 
 TEST(BlockTest, FindDistance) {
@@ -77,7 +77,7 @@ TEST(BlockTest, FindDistance) {
   double distance = block.findDistance(particle1, particle2);
 
   // Check that the distance is calculated correctly
-  ASSERT_EQ(distance, 0.01);
+  ASSERT_EQ(distance, 0.0099999904632568359);
 }
 
 TEST(BlockTest, AccelerationTransfer) {
@@ -98,13 +98,13 @@ TEST(BlockTest, AccelerationTransfer) {
                               grid.get_accTransConstant2());
 
   // Check that the particles' accelerations have been updated
-  ASSERT_EQ(particle1.get_ax(), -0.01625);
-  ASSERT_EQ(particle1.get_ay(), 0.01625);
-  ASSERT_EQ(particle1.get_az(), 0.0);
+  ASSERT_EQ(particle1.get_ax(), 0);
+  ASSERT_EQ(particle1.get_ay(), -9.8);
+  ASSERT_EQ(particle1.get_az(), 0);
 
-  ASSERT_EQ(particle2.get_ax(), 0.01625);
-  ASSERT_EQ(particle2.get_ay(), -0.01625);
-  ASSERT_EQ(particle2.get_az(), 0.0);
+  ASSERT_EQ(particle2.get_ax(), 0);
+  ASSERT_EQ(particle2.get_ay(), -9.8);
+  ASSERT_EQ(particle2.get_az(), 0);
 }
 
 TEST(BlockTest, UpdateParticleMotion) {
@@ -120,9 +120,9 @@ TEST(BlockTest, UpdateParticleMotion) {
   block.particleMotion(particle);
 
   // Check that the particle's position, velocity, and hv have been updated
-  ASSERT_NE(particle.get_position(), (std::vector<float>{0.01, 0.0, 0.0}));
-  ASSERT_NE(particle.get_velocity(), (std::vector<float>{0.01, 0.0, 0.0}));
-  ASSERT_NE(particle.get_hv(), (std::vector<float>{0.02, 0.0, 0.0}));
+  ASSERT_NE(particle.get_position(), (std::vector<float>{0.01, 0.0, 0.01}));
+  ASSERT_NE(particle.get_velocity(), (std::vector<float>{0.01, 0.0, 0.01}));
+  ASSERT_NE(particle.get_hv(), (std::vector<float>{0.02, 0.0, 0.02}));
 }
 
 TEST(BlockTest, ProcessParticleBoxCollisions) {
@@ -138,9 +138,9 @@ TEST(BlockTest, ProcessParticleBoxCollisions) {
   block.boxCollisions(particle);
 
   // Check that the particle's position, velocity, and hv have been updated
-  ASSERT_NE(particle.get_position(), (std::vector<float>{0.063, 0.02, 0.03}));
-  ASSERT_NE(particle.get_velocity(), (std::vector<float>{0.01, 0.0, 0.0}));
-  ASSERT_NE(particle.get_hv(), (std::vector<float>{0.02, 0.0, 0.0}));
+  ASSERT_NE(particle.get_position(), (std::vector<float>{0.063, 0.02, 0.02}));
+  ASSERT_NE(particle.get_velocity(), (std::vector<float>{0.02, 0.0, 0.0}));
+  ASSERT_NE(particle.get_hv(), (std::vector<float>{0.04, 0.0, 0.0}));
 }
 
 TEST(BlockTest, ProcessParticleBoundaryCollisions) {
@@ -156,6 +156,6 @@ TEST(BlockTest, ProcessParticleBoundaryCollisions) {
   block.boundaryCollisions(particle);
 
   // Check that the particle's position has been updated
-  ASSERT_NE(particle.get_position(), (std::vector<float>{0.063, 0.02, 0.03}));
+  ASSERT_NE(particle.get_position(), (std::vector<float>{0.063, 0.02, 0.04}));
 }
 

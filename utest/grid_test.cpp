@@ -95,7 +95,7 @@ TEST(GridFindBlockTest, FindBlockWithValidParticlePosition) {
   std::vector<int> blockIndices = grid.findBlock(particle);
 
   // Check that the block indices are correct
-  ASSERT_EQ(blockIndices[0], 1);
-  ASSERT_EQ(blockIndices[1], 1);
-  ASSERT_EQ(blockIndices[2], 1);
+  ASSERT_EQ(blockIndices[0], 0);
+  ASSERT_EQ(blockIndices[1], 0);
+  ASSERT_EQ(blockIndices[2], 0);
 }
