@@ -165,9 +165,9 @@ void Block::boxCollisions(Particle part) {
     auto newCoord =
         static_cast<float>(position[i] + vectorhv[i] * Constants::timeStep);
     double const changeLower =
-        Constants::particleSize - (newCoord - Constants::boxLowerBound[i]);
+        Constants::particleSize - (newCoord - Constants::getBoxLowerBound()[i]);
     double const changeUpper =
-        Constants::particleSize - (Constants::boxUpperBound[i] - newCoord);
+        Constants::particleSize - (Constants::getBoxUpperBound()[i] - newCoord);
     auto check = pow(ten, minus_ten);
 
     if (changeLower > check) {
@@ -189,15 +189,17 @@ void Block::boundaryCollisions(Particle part) {
   std::vector<float> vectorhv = part.get_hv();
 
   for (int i = 0; i < 3; i++) {
-    auto dLower = position[i] - Constants::boxLowerBound[i];
-    auto dUpper = Constants::boxUpperBound[i] - position[i];
+    auto dLower = position[i] - Constants::getBoxLowerBound()[i];
+    auto dUpper = Constants::getBoxUpperBound()[i] - position[i];
 
     if (dLower < 0) {
-      position[i] = static_cast<float>(Constants::boxLowerBound[i] - dLower);
+      position[i] =
+          static_cast<float>(Constants::getBoxLowerBound()[i] - dLower);
       velocity[i] = -1 * velocity[i];
       vectorhv[i] = -1 * vectorhv[i];
     } else if (dUpper < 0) {
-      position[i] = static_cast<float>(Constants::boxUpperBound[i] + dUpper);
+      position[i] =
+          static_cast<float>(Constants::getBoxUpperBound()[i] + dUpper);
       velocity[i] = -1 * velocity[i];
       vectorhv[i] = -1 * vectorhv[i];
     }

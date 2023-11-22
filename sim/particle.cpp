@@ -1,17 +1,16 @@
-// Particle class implementation
 #include "particle.hpp"
-
-#include <utility>
 
 // Constructor
 Particle::Particle(int particleID, std::vector<float> partPosition,
-                   std::vector<float> partHv, std::vector<float> partVelocity) : id(particleID), position(std::move(partPosition)), acceleration(Constants::externalAcceleration), density(0.0), accelerated(false), velocity(std::move(partVelocity)), hv(std::move(partHv)) {
-}
+                   std::vector<float> partHv, std::vector<float> partVelocity)
+    : id(particleID), position(std::move(partPosition)),
+      acceleration(Constants::getExternalAcceleration()), density(0.0),
+      accelerated(false), velocity(std::move(partVelocity)),
+      hv(std::move(partHv)) {}
 
 // Destructor
 Particle::~Particle() = default;
-
-Particle::Particle(const Particle& other) = default;
+Particle::Particle(const Particle &other) = default;
 
 // Getters and setters for each variables
 int Particle::get_id() const { return id; }

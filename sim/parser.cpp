@@ -264,8 +264,8 @@ void mergeSort(std::vector<Particle> &particles, int left, int right) {
   for (int currentSize = 1; currentSize <= right - left; currentSize *= 2) {
     for (int leftStart = left; leftStart < right;
          leftStart += 2 * currentSize) {
-      int middle = std::min(leftStart + currentSize - 1, right);
-      int rightEnd = std::min(leftStart + 2 * currentSize - 1, right);
+      int const middle = std::min(leftStart + currentSize - 1, right);
+      int const rightEnd = std::min(leftStart + 2 * currentSize - 1, right);
       merge(particles, leftStart, middle, rightEnd);
     }
   }

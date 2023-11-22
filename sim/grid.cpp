@@ -2,7 +2,6 @@
 
 const float threeonefive = 315.0;
 const int sixtyfour = 64;
-const int six = 6;
 const int nine = 9;
 const int fifteen = 15;
 const int fourtyfive = 45;
@@ -75,19 +74,18 @@ void Grid::update_grid() {
   slSixth = pow(smoothingLength, six);
   slNinth = pow(smoothingLength, nine);
 
-  numberX = (Constants::boxUpperBound[0] - Constants::boxLowerBound[0]) /
-            smoothingLength;
-  numberY = (Constants::boxUpperBound[1] - Constants::boxLowerBound[1]) /
-            smoothingLength;
-  numberZ = (Constants::boxUpperBound[2] - Constants::boxLowerBound[2]) /
-            smoothingLength;
+  const auto &upperBound = Constants::getBoxUpperBound();
+  const auto &lowerBound = Constants::getBoxLowerBound();
+
+  numberX = (upperBound[0] - lowerBound[0]) / smoothingLength;
+  numberY = (upperBound[1] - lowerBound[1]) / smoothingLength;
+  numberZ = (upperBound[2] - lowerBound[2]) / smoothingLength;
   numberVector = {numberX, numberY, numberZ};
 
-  sizeX = (Constants::boxUpperBound[0] - Constants::boxLowerBound[0]) / numberX;
-  sizeY = (Constants::boxUpperBound[1] - Constants::boxLowerBound[1]) / numberY;
-  sizeZ = (Constants::boxUpperBound[2] - Constants::boxLowerBound[2]) / numberZ;
+  sizeX = (upperBound[0] - lowerBound[0]) / numberX;
+  sizeY = (upperBound[1] - lowerBound[1]) / numberY;
+  sizeZ = (upperBound[2] - lowerBound[2]) / numberZ;
   sizesVector = {sizeX, sizeY, sizeZ};
-
   densTransConstant =
       (threeonefive / sixtyfour * M_PI * slNinth) * particleMass;
   accTransConstant1 = (fifteen / M_PI * slSixth) *
@@ -106,7 +104,7 @@ std::vector<int> Grid::findBlock(Particle part) {
   std::vector<int> blockIndices = {0, 0, 0};
   for (int i = 0; i < 3; i++) {
     blockIndices[i] = static_cast<int>(
-        (position[i] - Constants::boxLowerBound[i]) / sizesVector[i]);
+        (position[i] - Constants::getBoxLowerBound()[i]) / sizesVector[i]);
   }
   // We must now check that these block coordinates obey their appropriate
   // boundaries
@@ -122,10 +120,10 @@ std::vector<int> Grid::findBlock(Particle part) {
 
 std::vector<float> Grid::moveParticleInBounds(std::vector<float> position) {
   for (int i = 0; i < 3; i++) {
-    if (position[i] > Constants::boxUpperBound[i]) {
-      position[i] = static_cast<float>(Constants::boxUpperBound[i]);
-    } else if (position[i] < Constants::boxLowerBound[i]) {
-      position[i] = static_cast<float>(Constants::boxLowerBound[i]);
+    if (position[i] > Constants::getBoxUpperBound()[i]) {
+      position[i] = static_cast<float>(Constants::getBoxUpperBound()[i]);
+    } else if (position[i] < Constants::getBoxLowerBound()[i]) {
+      position[i] = static_cast<float>(Constants::getBoxLowerBound()[i]);
     }
   }
 

@@ -48,8 +48,16 @@ private:
 
 public:
   // Constructor and Destructor
-  Grid(float ppm, int np);
+  explicit Grid(float ppm, int np);
   ~Grid();
+
+  // Delete the copy constructor and copy assignment operator
+  Grid(const Grid &) = delete;
+  Grid &operator=(const Grid &) = delete;
+
+  // Delete the move constructor and move assignment operator
+  Grid(Grid &&) = default;
+  Grid &operator=(Grid &&) = delete;
 
   // Getters and setters for each variable
   [[nodiscard]] std::unordered_map<std::vector<int>, Block, hashing::vHash>
@@ -94,7 +102,7 @@ public:
   std::vector<int> findBlock(Particle part);
 
   // Helper function for findBlock
-  std::vector<float> moveParticleInBounds(std::vector<float> position);
+  static std::vector<float> moveParticleInBounds(std::vector<float> position);
 };
 
 #endif // GRID_HPP

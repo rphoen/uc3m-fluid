@@ -10,8 +10,9 @@
 // Block class
 class Block {
 public:
-  // Constructor
+  // Constructor and Destructor
   explicit Block(std::vector<int> index);
+  ~Block();
 
   // Delete the copy constructor and copy assignment operator
   Block(const Block &) = default;
@@ -52,9 +53,6 @@ public:
 
   // Process boundary collisions
   static void boundaryCollisions(Particle part);
-
-  // Destructor
-  ~Block();
 
 private:
   std::vector<Particle> particles;

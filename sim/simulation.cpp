@@ -3,14 +3,12 @@
 
 // What arguments?
 // One particle, and then we can check its block info for adjacent particles?
-void simulateOneStep(const Grid &simGrid) // Why by reference?
-{
-
+void simulateOneStep(const Grid &simGrid) {
   // get blocks in a dictionary from simGrid
   auto blocksDict = simGrid.get_blocks();
 
   for (const auto &blockPair : blocksDict) {
-    static Block blockObj = blockPair.second;
+    Block blockObj = blockPair.second;
     for (auto particle : blockObj.getParticles()) {
       // Run each member function of a block on the particle in question
       blockObj.accelerationTransfer(particle, simGrid.get_slSq(),
@@ -18,9 +16,10 @@ void simulateOneStep(const Grid &simGrid) // Why by reference?
                                     simGrid.get_accTransConstant2());
       blockObj.incDensity(particle, simGrid.get_slSq(), simGrid.get_slSixth(),
                           simGrid.get_densTransConstant());
-      blockObj.boxCollisions(particle);
-      blockObj.particleMotion(particle);
-      blockObj.boundaryCollisions(particle);
+      // TODO: check if works, if not change pack to blockObj
+      Block::boxCollisions(particle);
+      Block::particleMotion(particle);
+      Block::boundaryCollisions(particle);
     }
   }
 }
