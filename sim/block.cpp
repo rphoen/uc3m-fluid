@@ -71,42 +71,34 @@ double Block::findDistance(const Particle &iPart, const Particle &jPart) {
 void Block::accelerationTransfer(Particle part, double slSq,
                                  double accTransConstant1,
                                  double accTransConstant2) {
-  auto px1 = part.get_px();
-  auto py1 = part.get_py();
-  auto pz1 = part.get_pz();
-
+  auto pos = part.get_position();
   for (auto &block : adjBlocks) {
     auto adjParts = block.getParticles();
     for (auto &adjPart : adjParts) {
-      auto px2 = adjPart.get_px();
-      auto py2 = adjPart.get_py();
-      auto pz2 = adjPart.get_pz();
-
-      // Need to check if distance is short enough first
-      auto xDiffSq = pow((px1 - px2), 2);
-      auto yDiffSq = pow((py1 - py2), 2);
-      auto zDiffSq = pow((pz1 - pz2), 2);
+      auto pos2 = adjPart.get_position(); // check if dist is short enough first
+      auto xDiffSq = pow((pos[0] - pos2[0]), 2);
+      auto yDiffSq = pow((pos[1] - pos2[1]), 2);
+      auto zDiffSq = pow((pos[2] - pos2[2]), 2);
       auto diffSum = xDiffSq + yDiffSq + zDiffSq;
 
-      if (diffSum < slSq) // Update the acceleration
-      {
+      if (diffSum < slSq) {
         double const distance = findDistance(part, adjPart);
         // Change this to helper function eventually
-        auto xAccChange = (((px1 - px2) * accTransConstant1 *
+        auto xAccChange = (((pos[0] - pos2[0]) * accTransConstant1 *
                             ((pow((slSq - distance), 2)) / distance) *
                             (part.get_density() + adjPart.get_density() -
                              (2 * Constants::fluidDensity)) *
                             accTransConstant2) /
                            (part.get_density() * adjPart.get_density()));
 
-        auto yAccChange = (((py1 - py2) * accTransConstant1 *
+        auto yAccChange = (((pos[1] - pos2[1]) * accTransConstant1 *
                             ((pow((slSq - distance), 2)) / distance) *
                             (part.get_density() + adjPart.get_density() -
                              (2 * Constants::fluidDensity)) *
                             accTransConstant2) /
                            (part.get_density() * adjPart.get_density()));
 
-        auto zAccChange = (((pz1 - pz2) * accTransConstant1 *
+        auto zAccChange = (((pos[2] - pos2[2]) * accTransConstant1 *
                             ((pow((slSq - distance), 2)) / distance) *
                             (part.get_density() + adjPart.get_density() -
                              (2 * Constants::fluidDensity)) *
