@@ -2,13 +2,15 @@
 #include "sim/progargs.hpp"
 
 #include <iostream>
+#include <span>
 
 int main(int argc, char **argv) {
   // arguments
-  progargs(argc, argv);
+  std::array<char *, 4> args = {argv[0], argv[1], argv[2], argv[3]};
+  progargs(argc, args);
 
   // parsing file
-  parser(argv);
+  parser(args);
 
   return 0;
 }

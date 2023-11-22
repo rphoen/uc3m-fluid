@@ -1,7 +1,10 @@
 #ifndef GRID_HPP
 #define GRID_HPP
 #include "block.hpp"
+#include "constants.hpp"
 #include "hash.cpp"
+#include <iostream>
+#include <ostream>
 #include <unordered_map>
 
 // Grid class
@@ -14,35 +17,34 @@ private:
   // them
   float ppm;
   int np;
-  int count; // number of particles counted
+  int count{}; // number of particles counted
 
   // Number of blocks in each dimension
-  double numberX;
-  double numberY;
-  double numberZ;
+  double numberX{};
+  double numberY{};
+  double numberZ{};
   std::vector<double> numberVector;
-  // Total number of blocks in the grid
-  double numBlocks;
 
   // The size of grid blocks in each dimension
-  double sizeX;
-  double sizeY;
-  double sizeZ;
+  double sizeX{};
+  double sizeY{};
+  double sizeZ{};
   std::vector<double> sizesVector;
 
   // Simulation parameters
-  double particleMass;
-  double smoothingLength;
+  double particleMass{};
+  double smoothingLength{};
+
   // Variations of smoothing length that are useful for the simulation
-  double slSq;
-  double slCu;
-  double slSixth;
-  double slNinth;
+  double slSq{};
+  double slCu{};
+  double slSixth{};
+  double slNinth{};
 
   // Constants for density and acceleration formula
-  double densTransConstant;
-  double accTransConstant1;
-  double accTransConstant2;
+  double densTransConstant{};
+  double accTransConstant1{};
+  double accTransConstant2{};
 
 public:
   // Constructor and Destructor
@@ -65,8 +67,6 @@ public:
   [[nodiscard]] double get_numberX() const;
   [[nodiscard]] double get_numberY() const;
   [[nodiscard]] double get_numberZ() const;
-
-  [[nodiscard]] double get_numBlocks() const;
 
   [[nodiscard]] double get_sizeX() const;
   [[nodiscard]] double get_sizeY() const;
@@ -92,6 +92,9 @@ public:
 
   // Find the block that a particle belongs in
   std::vector<int> findBlock(Particle part);
+
+  // Helper function for findBlock
+  std::vector<float> moveParticleInBounds(std::vector<float> position);
 };
 
 #endif // GRID_HPP

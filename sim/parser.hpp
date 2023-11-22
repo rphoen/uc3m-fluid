@@ -5,15 +5,16 @@
 #include "grid.hpp"
 #include "particle.hpp"
 #include "simulation.hpp"
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <locale>
 #include <vector>
 
-int parser(char **argv);
+int parser(std::array<char *, 4> args);
 
 // read binary value from file
-Grid readInput(const std::string& inputfile);
+Grid readInput(const std::string &inputfile);
 
 Particle readParticle(std::ifstream &input_file, int count);
 
@@ -21,7 +22,7 @@ Particle readParticle(std::ifstream &input_file, int count);
 int printParameters(Grid &grid);
 
 // write binary value to file
-void writeOutput(const std::string& outputfile, Grid &grid);
+void writeOutput(const std::string &outputfile, Grid &grid);
 
 void writeParticle(Particle particle, std::ofstream &output_file);
 

@@ -13,6 +13,14 @@ public:
   // Constructor
   explicit Block(std::vector<int> index);
 
+  // Delete the copy constructor and copy assignment operator
+  Block(const Block &) = default;
+  Block &operator=(const Block &) = delete;
+
+  // Delete the move constructor and move assignment operator
+  Block(Block &&) = delete;
+  Block &operator=(Block &&) = delete;
+
   // Member particle getter
   std::vector<Particle> getParticles();
 
@@ -37,16 +45,13 @@ public:
                             double accTransConstant1, double accTransConstant2);
 
   // Particle motion
-  void particleMotion(Particle part);
+  static void particleMotion(Particle part);
 
   // Process box collisions
-  void boxCollisions(Particle part);
+  static void boxCollisions(Particle part);
 
   // Process boundary collisions
-  void boundaryCollisions(Particle part);
-
-  // Copy constructor
-  Block(const Block& block);
+  static void boundaryCollisions(Particle part);
 
   // Destructor
   ~Block();

@@ -30,10 +30,10 @@ void write_binary_value(T value, std::ostream &os) {
   os.write(as_buffer(value), sizeof(value));
 }
 
-int parser(char **argv) {
-  int const nts = std::stoi(argv[1]); // number of time steps
-  std::string const inputfile = argv[2];
-  std::string const outputfile = argv[3];
+int parser(std::array<char *, 4> args) {
+  int const nts = std::stoi(args[1]); // number of time steps
+  std::string const inputfile = args[2];
+  std::string const outputfile = args[3];
 
   // Read input file
   Grid grid = readInput(inputfile);
@@ -111,7 +111,9 @@ int printParameters(Grid &grid) {
     std::cout << "Particle mass: " << grid.get_particleMass() << '\n';
     std::cout << "Grid size: " << grid.get_numberX() << " x "
               << grid.get_numberY() << " x " << grid.get_numberZ() << '\n';
-    std::cout << "Number of blocks: " << grid.get_numBlocks() << '\n';
+    std::cout << "Number of blocks: "
+              << grid.get_numberX() * grid.get_numberY() * grid.get_numberZ()
+              << '\n';
     std::cout << "Block size: " << grid.get_sizeX() << " x " << grid.get_sizeY()
               << " x " << grid.get_sizeZ() << '\n';
     return 1;
@@ -121,7 +123,7 @@ int printParameters(Grid &grid) {
   return 0;
 }
 
-void writeOutput(const std::string& outputfile, Grid &grid) {
+void writeOutput(const std::string &outputfile, Grid &grid) {
   std::ofstream output_file(outputfile, std::ios::binary);
 
   // Sort all the particles
@@ -130,12 +132,12 @@ void writeOutput(const std::string& outputfile, Grid &grid) {
     std::vector<Particle> temp = block.second.getParticles();
     particles.insert(particles.end(), temp.begin(), temp.end());
   }
-  mergeSort(particles, 0, particles.size() - 1);
+  mergeSort(particles, 0, static_cast<int>(particles.size() - 1));
 
   write_binary_value(grid.get_ppm(), output_file);
   write_binary_value(grid.get_np(), output_file);
 
-  for (const auto& particle : particles) {
+  for (const auto &particle : particles) {
     writeParticle(particle, output_file);
   }
   output_file.close();
@@ -169,16 +171,17 @@ void merge(std::vector<Particle> &particles, int left, int middle, int right) {
   int const num2 = right - middle;
 
   std::vector<Particle> lll(particles.begin() + left,
-                          particles.begin() + left + num1);
+                            particles.begin() + left + num1);
   std::vector<Particle> rrr(particles.begin() + middle + 1,
-                          particles.begin() + middle + 1 + num2);
+                            particles.begin() + middle + 1 + num2);
 
   int iii = 0;
   int jjj = 0;
   int kkk = left;
 
   while (iii < num1 && jjj < num2) {
-    particles[kkk++] = (lll[iii].get_id() <= rrr[jjj].get_id()) ? lll[iii++] : rrr[jjj++];
+    particles[kkk++] =
+        (lll[iii].get_id() <= rrr[jjj].get_id()) ? lll[iii++] : rrr[jjj++];
   }
 
   while (iii < num1) {
@@ -239,16 +242,31 @@ void merge(std::vector<Particle> &particles, int left, int middle, int right) {
 //   R.clear();
 // }
 
+// mergesort recursive (don't delete)
+// void mergeSort(std::vector<Particle> &particles, int left, int right) {
+//   if (left < right) {
+//     // Same as (l+r)/2, but avoids overflow for
+//     // large l and h
+//     int const middle = left + (right - left) / 2;
+//
+//     // Sort first and second halves
+//     mergeSort(particles, left, middle);
+//     mergeSort(particles, middle + 1, right);
+//
+//     merge(particles, left, middle, right);
+//   }
+// }
+
+// mergesort interative to fix clang-tidy warning
+#include <vector>
+
 void mergeSort(std::vector<Particle> &particles, int left, int right) {
-  if (left < right) {
-    // Same as (l+r)/2, but avoids overflow for
-    // large l and h
-    int const middle = left + (right - left) / 2;
-
-    // Sort first and second halves
-    mergeSort(particles, left, middle);
-    mergeSort(particles, middle + 1, right);
-
-    merge(particles, left, middle, right);
+  for (int currentSize = 1; currentSize <= right - left; currentSize *= 2) {
+    for (int leftStart = left; leftStart < right;
+         leftStart += 2 * currentSize) {
+      int middle = std::min(leftStart + currentSize - 1, right);
+      int rightEnd = std::min(leftStart + 2 * currentSize - 1, right);
+      merge(particles, leftStart, middle, rightEnd);
+    }
   }
 }

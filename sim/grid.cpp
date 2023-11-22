@@ -1,7 +1,4 @@
 #include "grid.hpp"
-#include "block.hpp"
-#include "constants.hpp"
-#include <unordered_map>
 
 const float threeonefive = 315.0;
 const int sixtyfour = 64;
@@ -11,37 +8,9 @@ const int fifteen = 15;
 const int fourtyfive = 45;
 
 // Constructor and Destructor
-Grid::Grid(float ppm, int np) : ppm(ppm), np(np), sizeX((Constants::boxUpperBound[0] - Constants::boxLowerBound[0]) / numberX) {
-  particleMass = Constants::fluidDensity / pow(ppm, 3);
-  smoothingLength = Constants::radiusMultiplier / ppm;
-
-  slSq = pow(smoothingLength, 2);
-  slCu = pow(smoothingLength, 3);
-  slSixth = pow(smoothingLength, six);
-  slNinth = pow(smoothingLength, nine);
-
-  numberX = (Constants::boxUpperBound[0] - Constants::boxLowerBound[0]) /
-            smoothingLength;
-  numberY = (Constants::boxUpperBound[1] - Constants::boxLowerBound[1]) /
-            smoothingLength;
-  numberZ = (Constants::boxUpperBound[2] - Constants::boxLowerBound[2]) /
-            smoothingLength;
-  numberVector = {numberX, numberY, numberZ};
-
-  numBlocks = numberX * numberY * numberZ;
-
-
-  sizeY = (Constants::boxUpperBound[1] - Constants::boxLowerBound[1]) / numberY;
-  sizeZ = (Constants::boxUpperBound[2] - Constants::boxLowerBound[2]) / numberZ;
-  sizesVector = {sizeX, sizeY, sizeZ};
-
-  densTransConstant = (threeonefive / sixtyfour * M_PI * slNinth) * particleMass;
-  accTransConstant1 = (fifteen / M_PI * slSixth) *
-                      ((3 * particleMass * Constants::stiffnessPressure) / 2);
-  accTransConstant2 =
-      (fourtyfive / M_PI * slSixth) * Constants::viscosity * particleMass;
-
-  blocks = std::unordered_map<std::vector<int>, Block, hashing::vHash>();
+Grid::Grid(float ppm, int np)
+    : ppm(ppm), np(np), particleMass(Constants::fluidDensity / pow(ppm, 3)),
+      smoothingLength(Constants::radiusMultiplier / ppm) {
   update_grid();
 }
 
@@ -63,7 +32,6 @@ double Grid::get_smoothingLength() const { return smoothingLength; }
 double Grid::get_numberX() const { return numberX; }
 double Grid::get_numberY() const { return numberY; }
 double Grid::get_numberZ() const { return numberZ; }
-double Grid::get_numBlocks() const { return numBlocks; }
 double Grid::get_sizeX() const { return sizeX; }
 double Grid::get_sizeY() const { return sizeY; }
 double Grid::get_sizeZ() const { return sizeZ; }
@@ -102,13 +70,10 @@ void Grid::add_particle_to_block(const Particle &particle) {
 
 // update simulation parameters
 void Grid::update_grid() {
-  particleMass = Constants::fluidDensity / pow(ppm, 3);
-  smoothingLength = Constants::radiusMultiplier / ppm;
-
   slSq = pow(smoothingLength, 2);
   slCu = pow(smoothingLength, 3);
-  slSixth = pow(smoothingLength, 6);
-  slNinth = pow(smoothingLength, 9);
+  slSixth = pow(smoothingLength, six);
+  slNinth = pow(smoothingLength, nine);
 
   numberX = (Constants::boxUpperBound[0] - Constants::boxLowerBound[0]) /
             smoothingLength;
@@ -118,14 +83,13 @@ void Grid::update_grid() {
             smoothingLength;
   numberVector = {numberX, numberY, numberZ};
 
-  numBlocks = numberX * numberY * numberZ;
-
   sizeX = (Constants::boxUpperBound[0] - Constants::boxLowerBound[0]) / numberX;
   sizeY = (Constants::boxUpperBound[1] - Constants::boxLowerBound[1]) / numberY;
   sizeZ = (Constants::boxUpperBound[2] - Constants::boxLowerBound[2]) / numberZ;
   sizesVector = {sizeX, sizeY, sizeZ};
 
-  densTransConstant = (threeonefive / sixtyfour * M_PI * slNinth) * particleMass;
+  densTransConstant =
+      (threeonefive / sixtyfour * M_PI * slNinth) * particleMass;
   accTransConstant1 = (fifteen / M_PI * slSixth) *
                       ((3 * particleMass * Constants::stiffnessPressure) / 2);
   accTransConstant2 =
@@ -136,17 +100,9 @@ void Grid::update_grid() {
 // ** NEED TO ACCOUNT FOR EDGE CASES OF SURPASSING BOUNDARIES
 std::vector<int> Grid::findBlock(Particle part) {
   std::vector<float> position = part.get_position();
-  // First need to confirm that each particle is in bounds
-  for (int i = 0; i < 3; i++) {
-    if (position[i] > Constants::boxUpperBound[i]) {
-      position[i] = static_cast<float>(Constants::boxUpperBound[i]);
-    } else if (position[i] < Constants::boxLowerBound[i]) {
-      position[i] = static_cast<float>(Constants::boxLowerBound[i]);
-    }
-  }
+  position = moveParticleInBounds(position);
   // Now, need to find the specific block a particle occupies
-  // This is done by finding which block index the particle has in all three
-  // dimensions
+  // by finding which block index the particle has in all three dimensions
   std::vector<int> blockIndices = {0, 0, 0};
   for (int i = 0; i < 3; i++) {
     blockIndices[i] = static_cast<int>(
@@ -162,6 +118,18 @@ std::vector<int> Grid::findBlock(Particle part) {
     }
   }
   return blockIndices;
+}
+
+std::vector<float> Grid::moveParticleInBounds(std::vector<float> position) {
+  for (int i = 0; i < 3; i++) {
+    if (position[i] > Constants::boxUpperBound[i]) {
+      position[i] = static_cast<float>(Constants::boxUpperBound[i]);
+    } else if (position[i] < Constants::boxLowerBound[i]) {
+      position[i] = static_cast<float>(Constants::boxLowerBound[i]);
+    }
+  }
+
+  return position;
 }
 
 void Grid::findAdjBlocks(Block centerBlock) const {
