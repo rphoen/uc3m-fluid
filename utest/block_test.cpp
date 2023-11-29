@@ -1,15 +1,11 @@
 #include "gtest/gtest.h"
 #include "../sim/block.hpp"
-#include "../sim/constants.hpp"
-#include "../sim/particle.hpp"
 #include "../sim/grid.hpp"
-
-// g++ -o utest/block_test utest/block_test.cpp sim/block.cpp -lgtest -lpthread
 
 TEST(BlockTest, ConstructorWithValidBlockIndex) {
   // Create a block with index [0, 0, 0]
-  std::vector<int> blockIndex(3, 0);
-  Block block(blockIndex);
+  const std::vector<int> blockIndex(3, 0);
+  const Block block(blockIndex);
 
   // Check that the block's index is correct
   ASSERT_EQ(block.get_index()[0], 0);
@@ -19,7 +15,7 @@ TEST(BlockTest, ConstructorWithValidBlockIndex) {
 
 TEST(BlockTest, GetEmptyParticleVector) {
   // Create a block with index [0, 0, 0]
-  std::vector<int> blockIndex(3, 0);
+  const std::vector<int> blockIndex(3, 0);
   Block block(blockIndex);
 
   // Check that the block's particles vector is empty
@@ -28,11 +24,11 @@ TEST(BlockTest, GetEmptyParticleVector) {
 
 TEST(BlockTest, AddParticle) {
   // Create a block with index [0, 0, 0]
-  std::vector<int> blockIndex(3, 0);
+  const std::vector<int> blockIndex(3, 0);
   Block block(blockIndex);
 
   // Create a particle and add it to the block
-  Particle particle(1, {1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0});
+  const Particle particle(1, {1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0});
   block.addParticle(particle);
 
   // Check that the block's particles vector contains the added particle
@@ -45,12 +41,15 @@ TEST(BlockTest, AddParticle) {
 
 TEST(BlockTest, IncreaseDensity) {
   // Create a block with index [0, 0, 0]
-  std::vector<int> blockIndex(3, 0);
+  const std::vector<int> blockIndex(3, 0);
   Block block(blockIndex);
-  Grid grid(10.0, 1000);
+  const Grid grid(10.0, 1000);
+  std::vector<float> const position{0.1, 0.2, 0.3};
+  std::vector<float> const halfVelocity{0.1, 0.2, 0.3};
+  std::vector<float> const velocity{0.2, 0.4, 0.6};
 
   // Create a particle and add it to the block
-  Particle particle(4, {0.01, 0.01, 0.01}, {0.01, 0.0, 0.0}, {0.02, 0.0, 0.0});
+  Particle particle(4, position, halfVelocity, velocity);
   block.addParticle(particle);
 
   // Increase the density of the particle
@@ -64,17 +63,17 @@ TEST(BlockTest, IncreaseDensity) {
 
 TEST(BlockTest, FindDistance) {
   // Create a block with index [0, 0, 0]
-  std::vector<int> blockIndex(3, 0);
+  const std::vector<int> blockIndex(3, 0);
   Block block(blockIndex);
 
   // Create two particles and add them to the block
-  Particle particle1(7, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
-  Particle particle2(8, {1.01, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+  const Particle particle1(7, {1.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+  const Particle particle2(8, {1.01, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
   block.addParticle(particle1);
   block.addParticle(particle2);
 
   // Find the distance between the particles
-  double distance = block.findDistance(particle1, particle2);
+  const double distance = Block::findDistance(particle1, particle2);
 
   // Check that the distance is calculated correctly
   ASSERT_EQ(distance, 0.0099999904632568359);
@@ -82,13 +81,15 @@ TEST(BlockTest, FindDistance) {
 
 TEST(BlockTest, AccelerationTransfer) {
   // Create a block with index [0, 0, 0]
-  std::vector<int> blockIndex(3, 0);
+  const std::vector<int> blockIndex(3, 0);
   Block block(blockIndex);
-  Grid grid(10.0, 1000);
+  const Grid grid(10.0, 1000);
 
   // Create two particles and add them to the block
-  Particle particle1(9, {0.01, 0.02, 0.0}, {0, -0.01, 0}, {0, 0, 0});
-  Particle particle2(10, {0.01, 0.01, 0.0}, {0, 0, 0}, {0, 0, 0});
+  const int nine = 9;
+  const int ten = 10;
+  Particle particle1(nine, {0.0, 0.0, 0.0}, {0, 0, 0}, {0, 0, 0});
+  Particle particle2(ten, {0.0, 0.0, 0.0}, {0, 0, 0}, {0, 0, 0});
   block.addParticle(particle1);
   block.addParticle(particle2);
 
@@ -109,15 +110,19 @@ TEST(BlockTest, AccelerationTransfer) {
 
 TEST(BlockTest, UpdateParticleMotion) {
   // Create a block with index [0, 0, 0]
-  std::vector<int> blockIndex(3, 0);
+  const std::vector<int> blockIndex(3, 0);
   Block block(blockIndex);
 
   // Create a particle and add it to the block
-  Particle particle(11, {0.01, 0.0, 0.0}, {0.01, 0.0, 0.0}, {0.02, 0.0, 0.0});
+  std::vector<float> const position{0.1, 0.2, 0.3};
+  std::vector<float> const halfVelocity{0.1, 0.2, 0.3};
+  std::vector<float> const velocity{0.2, 0.4, 0.6};
+  const int eleven = 11;
+  Particle particle(eleven, position, halfVelocity, velocity);
   block.addParticle(particle);
 
   // Update the particle's motion
-  block.particleMotion(particle);
+  Block::particleMotion(particle);
 
   // Check that the particle's position, velocity, and hv have been updated
   ASSERT_NE(particle.get_position(), (std::vector<float>{0.01, 0.0, 0.01}));
@@ -127,15 +132,19 @@ TEST(BlockTest, UpdateParticleMotion) {
 
 TEST(BlockTest, ProcessParticleBoxCollisions) {
   // Create a block with index [0, 0, 0]
-  std::vector<int> blockIndex(3, 0);
+  const std::vector<int> blockIndex(3, 0);
   Block block(blockIndex);
 
-  // Create a particle and add it to the block
-  Particle particle(12, {0.063, 0.02, 0.03}, {0.02, 0.0, 0.0}, {0.04, 0.0, 0.0});
+  // Create a particle and add it to the block'
+  std::vector<float> const position{0.1, 0.2, 0.3};
+  std::vector<float> const halfVelocity{0.1, 0.2, 0.3};
+  std::vector<float> const velocity{0.2, 0.4, 0.6};
+  const int twelve = 12;
+  Particle particle(twelve, position, halfVelocity, velocity);
   block.addParticle(particle);
 
   // Process particle box collisions
-  block.boxCollisions(particle);
+  Block::boxCollisions(particle);
 
   // Check that the particle's position, velocity, and hv have been updated
   ASSERT_NE(particle.get_position(), (std::vector<float>{0.063, 0.02, 0.02}));
@@ -145,15 +154,19 @@ TEST(BlockTest, ProcessParticleBoxCollisions) {
 
 TEST(BlockTest, ProcessParticleBoundaryCollisions) {
   // Create a block with index [0, 0, 0]
-  std::vector<int> blockIndex(3, 0);
+  std::vector<int> const blockIndex(3, 0);
   Block block(blockIndex);
 
   // Create a particle and add it to the block
-  Particle particle(13, {0.063, 0.02, 0.03}, {0.02, 0.0, 0.0}, {0.04, 0.0, 0.0});
+  std::vector<float> const position{0.1, 0.2, 0.3};
+  std::vector<float> const halfVelocity{0.1, 0.2, 0.3};
+  std::vector<float> const velocity{0.2, 0.4, 0.6};
+  const int thirteen = 13;
+  Particle particle(thirteen, position, halfVelocity, velocity);
   block.addParticle(particle);
 
   // Process particle boundary collisions
-  block.boundaryCollisions(particle);
+  Block::boundaryCollisions(particle);
 
   // Check that the particle's position has been updated
   ASSERT_NE(particle.get_position(), (std::vector<float>{0.063, 0.02, 0.04}));

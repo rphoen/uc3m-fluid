@@ -1,11 +1,9 @@
 #include "gtest/gtest.h"
 #include "../sim/grid.hpp"
-#include "../sim/particle.hpp"
-#include "../sim/constants.hpp"
 
 TEST(GridConstructorTest, ConstructorWithCorrectValues) {
   // Create a grid with 10 particles per million (ppm) and 1000 particles
-  Grid grid(10.0, 1000);
+  Grid const grid(10.0, 1000);
   const auto &upperBound = Constants::getBoxUpperBound();
   const auto &lowerBound = Constants::getBoxLowerBound();
 
@@ -31,35 +29,41 @@ TEST(GridConstructorTest, ConstructorWithCorrectValues) {
 
 TEST(GridAddParticleToBlockTest, AddParticleToExistingBlock) {
   // Create a grid with 10 particles per million (ppm) and 1000 particles
-  Grid grid(10.0, 1000);
+  const int ppm = 10;
+  const int npnp = 1000;
+  Grid grid(ppm, npnp);
 
   // Create a particle and add it to the grid
-  Particle particle(1, {1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0});
+  Particle const particle(1, {1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0});
   grid.add_particle_to_block(particle);
 
   // Check that the particle is in the grid's blocks
-  std::vector<int> blockIndices = grid.findBlock(particle);
+  std::vector<int> const blockIndices = grid.findBlock(particle);
   ASSERT_EQ(grid.get_blocks().count(blockIndices), 1);
 //   ASSERT_EQ(grid.get_blocks()[blockIndices].get_particles().size(), 1);
 }
 
 TEST(GridAddParticleToBlockTest, AddParticleToNewBlock) {
   // Create a grid with 10 particles per million (ppm) and 1000 particles
-  Grid grid(10.0, 1000);
+const int ppm = 10;
+const int npnp = 1000;
+  Grid grid(ppm, npnp);
 
   // Create a particle and add it to the grid
-  Particle particle(2, {11.0, 12.0, 13.0}, {14.0, 15.0, 16.0}, {17.0, 18.0, 19.0});
+  Particle const particle(2, {11.0, 12.0, 13.0}, {14.0, 15.0, 16.0}, {17.0, 18.0, 19.0});
   grid.add_particle_to_block(particle);
 
   // Check that the particle is in the grid's blocks
-  std::vector<int> blockIndices = grid.findBlock(particle);
+  std::vector<int> const blockIndices = grid.findBlock(particle);
   ASSERT_EQ(grid.get_blocks().count(blockIndices), 1);
 //   ASSERT_EQ(grid.get_blocks()[blockIndices].get_particles().size(), 1);
 }
 
 TEST(GridUpdateGridTest, UpdateGridWithNewParameters) {
   // Create a grid with 10 particles per million (ppm) and 1000 particles
-  Grid grid(10.0, 1000);
+  const int ppm = 10;
+  const int npnp = 1000;
+  Grid grid(ppm, npnp);
   const auto &upperBound = Constants::getBoxUpperBound();
   const auto &lowerBound = Constants::getBoxLowerBound();
 
@@ -88,10 +92,12 @@ TEST(GridUpdateGridTest, UpdateGridWithNewParameters) {
 
 TEST(GridFindBlockTest, FindBlockWithValidParticlePosition) {
   // Create a grid with 10 particles per million (ppm) and 1000 particles
-  Grid grid(10.0, 1000);
+  const int ppm = 10;
+  const int npnp = 1000;
+  Grid grid(ppm, npnp);
 
   // Create a particle and find its block
-  Particle particle(3, {0.1, 0.2, 0.3}, {0.1, 0.1, 0.1}, {0.2, 0.2, 0.2});
+  Particle const particle(3, {0.1, 0.2, 0.3}, {0.1, 0.1, 0.1}, {0.2, 0.2, 0.2});
   std::vector<int> blockIndices = grid.findBlock(particle);
 
   // Check that the block indices are correct
